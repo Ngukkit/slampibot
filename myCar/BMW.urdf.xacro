@@ -1,0 +1,43 @@
+<?xml version="1.0"?> 
+<robot name="BMW_Car" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+  <!-- 기본 core 내용 포함 -->
+  <xacro:include filename="BMW_core.xacro"/>
+
+  <!-- ros2_control 및 gazebo_control 직접 포함 -->
+  <!-- <xacro:include filename="ros2_control.xacro"/> -->
+  <xacro:include filename="gazebo_control.xacro"/>
+  <!-- <xacro:include filename="camera.xacro"/> -->
+
+  <!-- ros2_control 하드웨어 인터페이스 정의 -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <!-- 4륜 독립 조인트 각각 velocity command 인터페이스 선언 -->
+    <joint name="LF_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <joint name="RF_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <joint name="LB_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <joint name="RB_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+  </ros2_control>
+</robot>

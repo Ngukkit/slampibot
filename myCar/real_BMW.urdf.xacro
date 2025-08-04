@@ -1,0 +1,24 @@
+<?xml version="1.0"?> 
+<robot name="BMW_Car" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+  <!--
+    This is the master URDF file for the REAL robot.
+    It includes the core physical structure of the robot and can also include
+    xacro files for real sensors.
+
+    All simulation-specific tags like <gazebo> and plugins have been removed.
+  -->
+
+  <!-- Include the core components of the robot (links and joints) -->
+  <!-- This file is ESSENTIAL and defines the robot's physical shape. -->
+  <xacro:include filename="BMW_core.xacro"/>
+
+  <!-- 
+    You can also include xacro files for your real sensors here.
+    This helps keep the robot description organized.
+    Example:
+    <xacro:include filename="real_lidar.xacro" />
+    <xacro:include filename="real_camera.xacro" />
+  -->
+
+</robot>

@@ -1,0 +1,322 @@
+<?xml version="1.0"?> 
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="inertial_macros.xacro"/>
+    
+    <xacro:property name="wheel_mass" value="0.05"/>
+
+    <material name="blue">
+        <color rgba="0 0.2 0.9 1"/>
+    </material>
+
+    <material name="gray">
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+    
+    <material name="darkBlue">
+        <color rgba="0 0 0.1 1"/>
+    </material>
+
+    <link name="dummy_link"/>
+
+    <!-- Chassis -->
+    <link name="chassis"> 
+        <visual> 
+            <geometry> 
+                <box size="0.6 0.7 0.1"/> 
+            </geometry> 
+            <origin rpy="0 0 1.57" xyz="0 0 0"/> 
+            <material name="darkBlue"/>
+        </visual>
+
+        <collision>
+            <geometry> 
+                <box size="0.6 0.7 0.1"/> 
+            </geometry> 
+            <origin rpy="0 0 1.57" xyz="0 0 0"/> 
+        </collision>
+
+        <xacro:inertial_box mass="0.1" x="0.6" y="0.7" z="0.1">
+            <origin rpy="0 0 1.57" xyz="0 0 0"/> 
+        </xacro:inertial_box>
+
+    </link>
+
+    <joint name="chassis_joint" type="fixed">
+        <parent link="dummy_link"/>
+        <child link="chassis"/>
+        <origin xyz="0 0 0"/>
+    </joint>
+
+    <gazebo reference="chassis">
+        <material>Gazebo/DarkMagentaTransparent</material>
+    </gazebo>
+
+    <!-- Front Left Wheel -->
+    <link name="LB_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.2" length="0.07"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <sphere radius="0.2"/>
+            </geometry>
+        </collision>
+
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="0.07" radius="0.2">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+    <joint name="LB_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="LB_wheel"/>
+        <origin rpy="0 1.57 -1.57" xyz="-0.333 0.333 0"/>
+        <axis xyz="0 0 -1"/>
+
+        <!-- 조인트 물리 속성 추가 -->
+        <limit effort="10" velocity="100" lower="-3.14" upper="3.14"/>
+        <dynamics damping="0.1" friction="0.1"/>
+        <safety_controller k_velocity="1.0" soft_lower_limit="-100" soft_upper_limit="100"/>
+    </joint>
+
+    <gazebo reference="LB_wheel">
+        <material>Gazebo/Black</material>
+        <mu1 value="0.2"/>
+        <mu2 value="0.2"/>
+    </gazebo>
+
+    <!-- Back Left wheel -->
+    <link name="RB_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.2" length="0.07"/>
+            </geometry>
+
+            <material name="gray"/>
+        </visual>
+        
+        <collision>
+            <geometry>
+                <sphere radius="0.2"/>
+            </geometry>
+        </collision>
+
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="0.07" radius="0.2">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>    
+    
+    <joint name="RB_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="RB_wheel"/>
+        <origin rpy="0 1.57 -1.57" xyz="-0.333 -0.333 0"/>
+        <axis xyz="0 0 -1"/>
+
+        <!-- 조인트 물리 속성 추가 -->
+        <limit effort="10" velocity="100" lower="-3.14" upper="3.14"/>
+        <dynamics damping="0.1" friction="0.1"/>
+        <safety_controller k_velocity="1.0" soft_lower_limit="-100" soft_upper_limit="100"/>
+    </joint>
+    
+    <gazebo reference="RB_wheel">
+        <material>Gazebo/Black</material>
+        <mu1 value="0.2"/>
+        <mu2 value="0.2"/>
+    </gazebo>
+
+    <!-- Front Right Wheel -->
+    <link name="LF_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.2" length="0.07"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <sphere radius="0.2"/>
+            </geometry>
+        </collision>
+
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="0.07" radius="0.2">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
+
+    </link>
+
+    <joint name="LF_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="LF_wheel"/>
+        <origin rpy="0 1.57 -1.57" xyz="0.333 0.333 0"/>
+        <axis xyz="0 0 -1"/>
+
+        <!-- 조인트 물리 속성 추가 -->
+        <limit effort="10" velocity="100" lower="-3.14" upper="3.14"/>
+        <dynamics damping="0.1" friction="0.1"/>
+        <safety_controller k_velocity="1.0" soft_lower_limit="-100" soft_upper_limit="100"/>
+    </joint>
+
+    <gazebo reference="LF_wheel">
+        <material>Gazebo/Black</material>
+        <mu1 value="0.2"/>
+        <mu2 value="0.2"/>
+    </gazebo>
+
+    <!-- Back Right Wheel -->
+    <link name="RF_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.2" length="0.07"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <sphere radius="0.2"/>
+            </geometry>
+        </collision>
+
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="0.07" radius="0.2">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+    <joint name="RF_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="RF_wheel"/>
+        <origin rpy="0 1.57 -1.57" xyz="0.333 -0.333 0"/>
+        <axis xyz="0 0 -1"/> 
+
+        <!-- 조인트 물리 속성 추가 -->
+        <limit effort="10" velocity="100" lower="-3.14" upper="3.14"/>
+        <dynamics damping="0.1" friction="0.1"/>
+        <safety_controller k_velocity="1.0" soft_lower_limit="-100" soft_upper_limit="100"/>
+    </joint>
+
+    <gazebo reference="RF_wheel">
+        <material>Gazebo/Black</material>
+        <mu1 value="0.2"/>
+        <mu2 value="0.2"/>
+    </gazebo>
+
+    <!-- Transmission: ros2_control이 각 조인트를 velocity 인터페이스로 제어할 수 있게 매핑 -->
+    <transmission name="LF_wheel_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="LF_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="LF_wheel_motor">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="RF_wheel_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="RF_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="RF_wheel_motor">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="LB_wheel_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="LB_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="LB_wheel_motor">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <transmission name="RB_wheel_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="RB_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="RB_wheel_motor">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <!-- Lidar -->
+    <link name="lidar">
+        <visual>
+            <geometry>
+                <cylinder radius="0.15" length="0.25"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="-0.16 0 0.1"/>
+            <material name="blue"/>
+        </visual>
+        
+        <collision>
+            <geometry>
+                <cylinder radius="0.15" length="0.25"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="-0.16 0 0.1"/>
+        </collision>
+        
+        <xacro:inertial_cylinder mass="0.1" length="0.25" radius="0.15">
+            <origin rpy="0 0 0" xyz="-0.16 0 0.1"/>
+        </xacro:inertial_cylinder>
+
+    </link>
+
+    <joint name="lidar_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="lidar"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+    </joint>
+
+    <gazebo reference="lidar">
+        <material>Gazebo/Indigo</material>
+    </gazebo>
+
+    <!-- Camera-->
+    <link name="camera">
+        <visual>
+            <geometry>
+                <box size="0.15 0.15 0.08"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="0.2 0 0.05"/>
+            <material name="blue"/>
+        </visual>
+        
+        <collision>
+            <geometry>
+                <box size="0.15 0.15 0.08"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="0.2 0 0.05"/>
+        </collision>
+
+        <xacro:inertial_box mass="0.05" x="0.15" y="0.15" z="0.08">
+            <origin rpy="0 0 0" xyz="0 0 0"/> 
+        </xacro:inertial_box>
+    </link>
+    
+    <joint name="camera_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="camera"/>
+        <origin rpy="0 0 0" xyz="0.2 0 0.05"/>
+    </joint>
+
+    <gazebo reference="camera">
+        <material>Gazebo/Blue</material>
+    </gazebo>
+
+</robot>
+
+
+       
