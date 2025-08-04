@@ -7,7 +7,9 @@ from launch.actions import (
     SetEnvironmentVariable,
     TimerAction,
     GroupAction,
+    IncludeLaunchDescription
 )
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -19,6 +21,7 @@ def generate_launch_description():
 
     # Find the necessary packages and files
     pkg_share = FindPackageShare(package='slampibot_gazebo').find('slampibot_gazebo')
+    pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')
     world_file = os.path.join(pkg_share, "worlds", "spb_empty_space.world")
     urdf_xacro = os.path.join(pkg_share, 'myCar', 'BMW.urdf.xacro')
     rviz_config = os.path.join(pkg_share, 'rviz', 'spb_urdf.rviz')
@@ -27,106 +30,65 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
 
     # --- Gazebo Execution ---
-    # Execute Gazebo as a separate process to completely isolate it from ROS parameters.
-    # This prevents the 'robot_description' from leaking into the Gazebo process.
-    gazebo_server_cmd = ExecuteProcess(
-        cmd=['gzserver', '--verbose', '-s', 'libgazebo_ros_init.so', 
-             '-s', 'libgazebo_ros_factory.so', world_file],
-        output='screen',
+    gazebo_server_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
+        launch_arguments={'world': world_file}.items()
     )
 
-    gazebo_client_cmd = ExecuteProcess(
-        cmd=['gzclient'],
-        output='screen',
+    gazebo_client_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzclient.launch.py'))
     )
 
-    # Process the URDF file and write it to a temporary file
-    robot_description_content = xacro.process_file(urdf_xacro).toxml()
-    temp_urdf_file = '/tmp/bmw.urdf'
-    with open(temp_urdf_file, 'w') as f:
-        f.write(robot_description_content)
-
-    # --- Gazebo Execution ---
-    # Execute Gazebo as a separate process to completely isolate it from ROS parameters.
-    gazebo_server_cmd = ExecuteProcess(
-        cmd=['gzserver', '--verbose', '-s', 'libgazebo_ros_init.so', 
-             '-s', 'libgazebo_ros_factory.so', world_file],
-        output='screen',
-    )
-
-    gazebo_client_cmd = ExecuteProcess(
-        cmd=['gzclient'],
-        output='screen',
-    )
+    # --- Simulation Drive Node (for simple testing without full ros2_control setup) ---
+    # This node will subscribe to /cmd_vel and publish /odom and /joint_states
+    # sim_drive_node = Node(
+    #     package='slampibot_gazebo',
+    #     executable='slampibot_gazebo_node',
+    #     name='sim_drive_node',
+    #     output='screen',
+    #     parameters=[
+    #         {'use_sim_time': use_sim_time},
+    #         {'wheel_radius': 0.033},
+    #         {'wheel_separation': 0.167}
+    #     ]
+    # )
 
     # --- Robot Description and State Publisher ---
-    # robot_state_publisher still publishes the topic for other nodes like RViz
+    # Process the URDF file and create the robot_description parameter
+    robot_description_content = xacro.process_file(urdf_xacro).toxml()
+    robot_description_param = {
+        "robot_description": ParameterValue(robot_description_content, value_type=str)
+    }
+
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
-        parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_description_content}],
+        parameters=[robot_description_param, {'use_sim_time': use_sim_time}],
         output="screen"
     )
 
-    # --- Spawning the Robot ---
+    # --- Joint State Publisher ---
+    # This node is crucial for providing joint states to robot_state_publisher
+    joint_state_publisher_node = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_description_param}]
+    )
+
+    # --- Spawning the Robot in Gazebo ---
     spawn_entity_node = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-topic', 'robot_description', '-entity', 'slampibot'],
-        output='screen'
+        output='screen',
+        arguments=['-topic', 'robot_description', '-entity', 'slampibot']
     )
 
     # Delay spawning until Gazebo server is up
     delayed_spawn_entity = TimerAction(period=5.0, actions=[spawn_entity_node])
 
-    # --- Controllers ---
-    # The controller spawner nodes will automatically find the controller_manager
-    # service provided by the gazebo_ros2_control plugin.
-    controller_spawner_group = GroupAction(actions=[
-        Node(
-            package='controller_manager',
-            executable='spawner',
-            arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
-            output='screen',
-        ),
-        Node(
-            package='controller_manager',
-            executable='spawner',
-            arguments=['LF_wheel_vel', '--controller-manager', '/controller_manager'],
-            output='screen',
-        ),
-        Node(
-            package='controller_manager',
-            executable='spawner',
-            arguments=['RF_wheel_vel', '--controller-manager', '/controller_manager'],
-            output='screen',
-        ),
-        Node(
-            package='controller_manager',
-            executable='spawner',
-            arguments=['LB_wheel_vel', '--controller-manager', '/controller_manager'],
-            output='screen',
-        ),
-        Node(
-            package='controller_manager',
-            executable='spawner',
-            arguments=['RB_wheel_vel', '--controller-manager', '/controller_manager'],
-            output='screen',
-        ),
-    ])
-
-    # Delay controller spawning until the robot is spawned
-    delayed_controller_spawners = TimerAction(period=8.0, actions=[controller_spawner_group])
-
     # --- Other Nodes ---
-    joint_state_publisher_cmd = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}]
-    )
-
     rviz_cmd = Node(
         package='rviz2',
         executable='rviz2',
@@ -145,12 +107,12 @@ def generate_launch_description():
     # --- Launch Description ---
     return LaunchDescription([
         set_domain,
-        gazebo_server_cmd,
-        gazebo_client_cmd,
+        gazebo_server_cmd, # Launch Gazebo server
+        gazebo_client_cmd, # Launch Gazebo client
+        # sim_drive_node,    # Launch the simple simulation drive node (now handled by Gazebo plugin)
         robot_state_publisher_node,
-        delayed_spawn_entity,
-        joint_state_publisher_cmd,
-        delayed_controller_spawners,
+        joint_state_publisher_node, # Re-added joint_state_publisher
+        delayed_spawn_entity, # Spawn robot into Gazebo
         rviz_cmd,
         rqt_robot_steering_cmd,
     ])

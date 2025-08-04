@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.8)
 project(slampibot_gazebo)
 
@@ -10,19 +11,23 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-# find_package(gazebo_ros_pkgs REQUIRED) # Often needed for Gazebo plugins
+find_package(sensor_msgs REQUIRED) # Added sensor_msgs
+find_package(tf2_ros REQUIRED) # Added tf2_ros
+find_package(tf2 REQUIRED) # Added tf2
 
 # --- Executable for the Simulation Node ---
-# This node might be a dummy driver or interface for the simulation.
+# This builds the C++ code that simulates a differential drive robot.
 add_executable(slampibot_gazebo_node
   src/sim_drive_node.cpp
-  # Add other source files needed for the simulation node here
 )
 
 ament_target_dependencies(slampibot_gazebo_node 
     rclcpp 
     geometry_msgs 
     nav_msgs
+    sensor_msgs # Added sensor_msgs
+    tf2_ros # Added tf2_ros
+    tf2 # Added tf2
 )
 
 install(TARGETS
