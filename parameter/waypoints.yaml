@@ -1,0 +1,38 @@
+
+waypoints:
+  - id: 1
+    name: "Kitchen"
+    pose:
+      position:
+        x: 1.0
+        y: 0.0
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 2
+    name: "LivingRoom"
+    pose:
+      position:
+        x: 3.0
+        y: 2.0
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.707
+        w: 0.707 # Facing 90 degrees
+  - id: 3
+    name: "Bedroom"
+    pose:
+      position:
+        x: -2.0
+        y: 1.0
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 1.0
+        w: 0.0 # Facing 180 degrees

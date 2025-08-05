@@ -1,0 +1,49 @@
+
+controller_manager:
+  ros__parameters:
+    update_rate: 50 # Hz
+
+    diff_drive_controller: # Name of your differential drive controller
+      type: differential_drive_controller/DifferentialDriveController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+diff_drive_controller:
+  ros__parameters:
+    left_wheel_names: ['LF_wheel_joint', 'LB_wheel_joint']
+    right_wheel_names: ['RF_wheel_joint', 'RB_wheel_joint']
+
+    wheel_separation: 0.167 # meters (from real_BMW_core.xacro)
+    wheel_radius: 0.033 # meters (from real_BMW_core.xacro)
+
+    # PID gains for velocity control (these are examples, tune as needed)
+    # These are typically set in the hardware interface or the motor controller itself
+    # but can be overridden here if the hardware interface supports it.
+    # publish_cmd_vel_stamped: true
+
+    # Odometry parameters
+    publish_rate: 50.0 # Hz
+    odom_frame_id: odom
+    base_frame_id: dummy_link
+    pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+
+    # Velocity limits (example values, tune based on your robot)
+    linear_velocity_limits:
+      x: [-0.5, 0.5]
+      y: [0.0, 0.0] # Differential drive cannot move sideways
+    angular_velocity_limits:
+      z: [-1.0, 1.0]
+
+    # Acceleration limits (example values, tune based on your robot)
+    linear_acceleration_limits:
+      x: [-1.0, 1.0]
+    angular_acceleration_limits:
+      z: [-2.0, 2.0]
+
+    # Deceleration limits (example values, tune based on your robot)
+    linear_deceleration_limits:
+      x: [-1.0, 1.0]
+    angular_deceleration_limits:
+      z: [-2.0, 2.0]

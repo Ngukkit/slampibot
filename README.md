@@ -1,6 +1,6 @@
 # slampibot_gazebo - 로봇 구동 및 시뮬레이션 패키지
 
-## 버전: v0.11
+## 버전: v0.14
 
 이 패키지는 4륜 구동 로봇의 구동 및 시뮬레이션을 위한 ROS2 드라이버와 설정 파일을 포함합니다. 특히, Dynamixel XL430 모터와 OpenCR 1.0 보드를 사용하는 실제 로봇 구동에 초점을 맞춰 개발되었습니다.
 
@@ -13,10 +13,10 @@
 ## 2. 주요 구성 요소
 
 *   **하드웨어**: Raspberry Pi 5, OpenCR 1.0, Dynamixel XL430 (4개), 라이다, 카메라
-*   **통신**: USB-Serial 통신 (Dynamixel SDK 기반)
+*   **통신**: USB-Serial 통신 (rosserial_python 기반)
 *   **ROS2 배포판**: Humble (예상)
 
-## 3. 파일 구조 및 주요 변경 사항 (v0.11 기준)
+## 3. 파일 구조 및 현재 상태 (v0.14 기준)
 
 ### 3.1. 로봇 모델 정의 (URDF)
 
@@ -26,22 +26,24 @@
 
 ### 3.2. ROS2 Launch 파일
 
-*   **`launch/real_robot.launch.py`**: 실제 로봇 구동을 위한 Launch 파일입니다. Gazebo 및 시뮬레이션 관련 노드를 포함하지 않으며, `robot_state_publisher`, `real_driver_node`, 라이다/카메라 드라이버를 실행합니다.
-*   **`launch/spb_spawn_space.launch.py`**: Gazebo 시뮬레이션 구동을 위한 Launch 파일입니다. `ExecuteProcess`를 사용하여 Gazebo를 ROS 파라미터로부터 격리하여 실행합니다.
+*   **`launch/real_robot.launch.py`**: 실제 로봇 구동을 위한 Launch 파일입니다. `rosserial_python`을 사용하여 OpenCR 보드와 통신하고, `robot_state_publisher`, 라이다/카메라 드라이버를 실행합니다.
+*   **`launch/real_nav.launch.py`**: 실제 로봇에서 내비게이션 스택(Nav2)을 구동하기 위한 Launch 파일입니다. `rosserial_python`을 포함합니다.
+*   **`launch/spb_spawn_space.launch.py`**: Gazebo 시뮬레이션 구동을 위한 Launch 파일입니다. `gazebo_ros_diff_drive` 플러그인을 사용하여 4륜 스키드 스티어 로봇을 시뮬레이션합니다.
 
 ### 3.3. 로봇 드라이버 코드
 
-*   **`src/real_driver_node.cpp`**: `EduDrive` 시스템을 초기화하고 실행하는 ROS2 노드의 메인 진입점입니다. 실제 로봇 구동 시 사용됩니다.
-*   **`src/EduDrive.h`, `src/EduDrive.cpp`**: 로봇의 핵심 구동 로직을 포함하는 클래스입니다. `cmd_vel` 명령 처리, 오도메트리 계산, 센서 데이터 발행 등을 담당합니다. `SocketCAN` 대신 `DynamixelSerialPort`를 사용하도록 수정되었습니다.
-*   **`src/MotorController.h`, `src/MotorController.cpp`**: Dynamixel XL430 모터를 직접 제어하는 클래스입니다. CAN 통신 로직이 Dynamixel SDK 기반의 USB-Serial 통신 로직으로 교체되었습니다. 모터의 토크 제어, 속도 설정, 현재 속도 읽기 등을 수행합니다.
-*   **`src/dynamixel/DynamixelSerialPort.h`, `src/dynamixel/DynamixelSerialPort.cpp`**: Dynamixel SDK를 사용하여 USB-Serial 포트 통신을 처리하는 기본 클래스입니다. `SocketCAN`을 대체합니다.
-*   **`src/RPiAdapterBoard.h/.cpp`, `src/RPiExtensionBoard.h/.cpp`, `src/PowerManagementBoard.h/.cpp`**: OpenCR 보드의 센서(IMU, 전압, 전류) 및 GPIO/서보 제어 인터페이스 클래스입니다. `usb_to_dxl` 펌웨어의 한계로 인해 현재는 해당 기능들이 직접 지원되지 않으며, 더미 값을 반환하도록 수정되었습니다.
+*   **`src/sim_drive_node.cpp`**: Gazebo 없이 RViz에서 로봇의 움직임을 시뮬레이션하기 위한 간단한 차동 구동 노드입니다. (현재는 `spb_spawn_space.launch.py`에서 사용되지 않음)
+*   **`src/EduDrive.h`, `src/EduDrive.cpp` 등 EduDrive 시스템 관련 파일**: `real_driver_node`와 `ros2_control` 기반의 `DynamixelHardwareInterface` 플러그인 개발 과정에서 사용되었으나, 최종적으로 `turtlebot3_core.ino` 펌웨어와 `rosserial_python` 방식으로 전환하면서 **더 이상 사용되지 않습니다.** (파일은 삭제됨)
+*   **`src/hardware_interface` 디렉토리**: `ros2_control` 기반의 `DynamixelHardwareInterface` 플러그인 개발 과정에서 사용되었으나, 최종적으로 `turtlebot3_core.ino` 펌웨어와 `rosserial_python` 방식으로 전환하면서 **더 이상 사용되지 않습니다.** (디렉토리 삭제됨)
+*   **`src/dynamixel` 디렉토리**: `DynamixelSerialPort` 클래스 개발 과정에서 사용되었으나, 최종적으로 `turtlebot3_core.ino` 펌웨어와 `rosserial_python` 방식으로 전환하면서 **더 이상 사용되지 않습니다.** (디렉토리 삭제됨)
 
 ### 3.4. 빌드 시스템 및 파라미터
 
-*   **`real_CMakeLists.txt`**: 실제 로봇 구동을 위한 `real_driver_node` 및 관련 소스 파일들을 빌드하도록 설정된 CMake 파일입니다. `DynamixelSDK` 라이브러리에 링크됩니다.
+*   **`real_CMakeLists.txt`**: `rosserial_python` 방식에서는 별도의 C++ 노드를 빌드하지 않으므로, 최소한의 설정만 포함합니다.
 *   **`CMakeLists.txt`**: Gazebo 시뮬레이션 구동을 위한 CMake 파일입니다.
-*   **`parameter/edu_drive_edu_bot.yaml`**: `real_driver_node`에 전달되는 ROS2 파라미터들을 정의합니다. 로봇의 하드웨어 설정, 통신 방식, 모터 제어 특성, 그리고 가장 중요한 로봇의 기구학 모델(`kinematics`)을 포함합니다.
+*   **`parameter/edu_drive_edu_bot.yaml`**: `real_driver_node` (EduDrive 기반)에 전달되는 파라미터들을 정의합니다. (현재 `rosserial_python` 방식에서는 직접 사용되지 않음)
+*   **`parameter/ros_controllers.yaml`**: `ros2_control` 기반의 `diff_drive_controller` 설정을 정의합니다. (현재 `rosserial_python` 방식에서는 직접 사용되지 않음)
+*   **`parameter/spb_nav2_params.yaml`**: 내비게이션 스택(Nav2)에 전달되는 파라미터들을 정의합니다. 차동 구동 로봇에 적합한 설정으로 시작합니다.
 *   **`parameter/README.md`**: `edu_drive_edu_bot.yaml` 파일의 내용과 각 파라미터의 의미를 설명하는 한국어 문서입니다.
 
 ### 3.5. 기타 문서
@@ -49,16 +51,47 @@
 *   **`README.md` (현재 디렉토리)**: Raspberry Pi 5에서 Docker를 사용하여 CAN 통신을 설정하는 방법에 대한 한국어 가이드입니다. (현재 프로젝트의 통신 방식과는 다름을 유의)
 *   **`Robot_Make_Order_Readme.md`**: 실제 로봇 제작 주문 전에 준비해야 할 소프트웨어 관련 사항들을 요약한 문서입니다.
 
-## 4. 현재 상태 및 제한 사항 (v0.11)
+## 4. 프로젝트 개발 여정 및 버전별 변경 이력
 
-*   **모터 제어**: `cmd_vel` 명령을 받아 Dynamixel XL430 모터의 속도를 제어하고, 현재 RPM을 읽어와 오도메트리를 업데이트하는 기능은 구현되었습니다.
-*   **OpenCR 센서/제어**: `usb_to_dxl.ino` 펌웨어의 특성상, OpenCR 보드 자체의 IMU, 전압, 전류, GPIO/서보 제어 기능은 이 통신 채널을 통해 직접 지원되지 않습니다. 관련 클래스들은 현재 더미 값을 반환합니다.
-*   **기구학**: `EduDrive` 시스템은 4륜 독립 구동 로봇의 기구학 계산을 지원하지만, `parameter/edu_drive_edu_bot.yaml` 파일의 `kinematics` 파라미터는 로봇의 실제 물리적 특성에 맞게 정확히 튜닝되어야 합니다.
+이 프로젝트는 4륜 구동 로봇의 제어를 목표로 여러 접근 방식을 시도하며 발전해 왔습니다.
+
+### v0.13 (이전 버전)
+
+*   **초기 접근 (EduDrive 시스템)**:
+    *   기존 `EduDrive` 시스템을 활용하여 로봇을 제어하고자 했습니다. 이 시스템은 CAN 통신을 기반으로 하며, `kinematics` 파라미터를 통해 4륜 독립 구동을 지원하는 구조를 가지고 있었습니다.
+    *   하지만, 실제 하드웨어(Dynamixel XL430, OpenCR 1.0)가 CAN HAT 없이 USB-Serial 통신을 사용해야 하는 상황에 직면했습니다.
+
+*   **USB-Serial 통신 전환 및 `usb_to_dxl` 시도**:
+    *   CAN 통신 대신 USB-Serial 통신을 사용하기 위해 `EduDrive` 시스템을 `DynamixelSerialPort` 기반으로 수정하고 `Dynamixel SDK`를 통합했습니다.
+    *   OpenCR 보드에는 `usb_to_dxl.ino` 펌웨어를 사용하고자 했습니다. 이 펌웨어는 OpenCR을 투명한 USB-Serial 브릿지로 작동시켜 라즈베리파이에서 Dynamixel 모터를 직접 제어할 수 있게 합니다.
+    *   이 단계에서 `ros2_control` 기반의 `DynamixelHardwareInterface` 플러그인 구현도 시도했습니다. 이는 `ros2_control`의 표준 방식을 따르기 위함이었습니다.
+
+*   **기구학적 이해의 전환**: 
+    *   4륜 로봇의 물리적 구조(일반 바퀴)로는 `linear.y`를 통한 횡이동이 불가능하며, `diff` (차동 구동) 방식처럼 동작한다는 것을 확인했습니다. 즉, 4륜의 개별 구동이 물리적으로 의미가 없다는 것을 깨달았습니다. 이로 인해 `ros2_control`의 `diff_drive_controller`를 사용하는 것이 합리적이라는 결론에 도달했습니다.
+
+*   **OpenCR 센서 데이터의 필요성 및 펌웨어 전환**: 
+    *   `usb_to_dxl` 펌웨어는 모터 제어만 가능하고 OpenCR 보드 자체의 IMU, 전압, 전류 등 중요한 센서 데이터를 노출하지 않는다는 한계에 직면했습니다. 
+    *   로봇의 정확한 오도메트리, 내비게이션, 상태 모니터링을 위해 이러한 센서 데이터가 필수적임을 인지했습니다.
+    *   **최종 결정**: OpenCR 보드 자체의 센서 데이터를 ROS2로 가져오기 위해 `turtlebot3_core.ino` 펌웨어를 사용하기로 결정했습니다. 이 펌웨어는 OpenCR을 ROS 노드처럼 작동시켜 USB-Serial 통신을 통해 다양한 센서 데이터(IMU, 전압, 전류, 오도메트리, 조인트 상태 등)를 직접 발행합니다.
+
+*   **상태 (v0.13)**:
+    *   **실제 로봇 구동**: OpenCR 보드에 `turtlebot3_core.ino` 펌웨어를 업로드하고, 라즈베리파이에서는 `rosserial_python` 노드를 사용하여 OpenCR과 통신합니다. OpenCR이 ROS 토픽을 직접 발행/구독하므로, 라즈베리파이 측의 복잡한 C++ 드라이버 코드(EduDrive, ros2_control 하드웨어 인터페이스)는 더 이상 필요 없습니다. 
+    *   **시뮬레이션**: `gazebo_ros_diff_drive` 플러그인을 사용하여 4륜 스키드 스티어 로봇의 움직임을 Gazebo에서 성공적으로 시뮬레이션하고 제어할 수 있습니다. RViz에서도 로봇 모델이 올바르게 표시되고 움직입니다.
+
+### v0.14 (현재 버전)
+
+*   **실제 로봇 구동 방식 확정**: `turtlebot3_core.ino` 펌웨어와 `rosserial_python`을 사용하는 방식으로 최종 확정되었습니다. 이에 따라 `real_CMakeLists.txt` 및 관련 C++ 드라이버 코드(EduDrive, ros2_control 하드웨어 인터페이스)는 제거되었습니다.
+*   **시뮬레이션 환경 안정화**: `gazebo_ros_diff_drive` 플러그인을 사용하여 Gazebo에서 4륜 스키드 스티어 로봇의 움직임을 성공적으로 시뮬레이션하고 RViz와 연동하는 것이 확인되었습니다.
+*   **Nav2 런처 추가**: 실제 로봇에서 Nav2 스택을 구동하기 위한 `launch/real_nav.launch.py` 파일이 추가되었습니다.
+*   **파라미터 파일 업데이트**: `parameter/edu_drive_edu_bot.yaml`이 차동 구동 로봇의 기구학에 맞게 업데이트되었으며, `parameter/spb_nav2_params.yaml`이 Nav2 스택의 기본 파라미터로 추가되었습니다.
 
 ## 5. 다음 단계
 
-1.  **OpenCR 1.0에 `usb_to_dxl.ino` 펌웨어 업로드**: OpenCR 보드에 이 펌웨어를 업로드합니다.
-2.  **Dynamixel SDK 설치**: Raspberry Pi에 Dynamixel SDK를 설치합니다.
-3.  **파라미터 파일 튜닝**: `parameter/edu_drive_edu_bot.yaml` 파일의 `kinematics` 및 모터 관련 파라미터들을 당신의 로봇에 맞게 정확히 설정합니다.
-4.  **빌드 및 실행**: `real_CMakeLists.txt`를 활성화하고 `colcon build` 후 `ros2 launch slampibot_gazebo real_robot.launch.py`를 실행합니다.
-5.  **OpenCR 센서 데이터 필요 시**: OpenCR 보드 자체의 센서 데이터(IMU, 전압 등)가 필요하다면, `usb_to_dxl` 펌웨어 대신 해당 데이터를 Dynamixel Protocol로 노출하는 다른 OpenCR 펌웨어(예: TurtleBot3의 OpenCR 펌웨어)를 사용하거나, 직접 펌웨어를 수정해야 합니다.
+1.  **`rosserial_python` 설치**: Raspberry Pi에 `rosserial_python` 패키지를 설치합니다.
+2.  **OpenCR 1.0에 `turtlebot3_core.ino` 펌웨어 업로드**: OpenCR 보드에 이 펌웨어를 업로드합니다.
+3.  **라이다 및 카메라 드라이버 설치**: Raspberry Pi에 라이다 및 카메라 모델에 맞는 ROS2 드라이버를 설치합니다.
+4.  **빌드 및 실행**: `real_CMakeLists.txt`는 이제 빌드할 C++ 코드가 없으므로, `colcon build`는 패키지를 빌드하지 않을 것입니다. 이후 다음 런처를 실행합니다.
+    *   기본 구동: `ros2 launch slampibot_gazebo ros_robot.launch.py`
+    *   내비게이션: `ros2 launch slampibot_gazebo real_nav.launch.py`
+
+이러한 준비가 완료되면, 실제 로봇을 구동하고 센서 데이터를 받아보며 내비게이션 및 SLAM 개발을 시작할 수 있을 것입니다.

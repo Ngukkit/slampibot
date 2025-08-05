@@ -1,45 +1,53 @@
-
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Include the physical description of the robot -->
   <xacro:include filename="real_BMW_core.xacro"/>
 
-  <!-- ros2_control hardware interface for the real robot (removed for rosserial approach) -->
-  <!-- 
+  <!-- ros2_control hardware interface for the real robot -->
   <ros2_control name="RobotHardware" type="system">
     <hardware>
-      <plugin>slampibot_gazebo/DynamixelHardwareInterface</plugin>
+      <plugin>slampibot_gazebo/DynamixelHardwareInterface</plugin> <!-- Updated plugin name -->
+      
+      <!-- Parameters for your hardware interface plugin -->
       <param name="device_name">/dev/ttyACM0</param>
       <param name="baud_rate">1000000</param>
       <param name="protocol_version">2.0</param>
-      <param name="opencr_id">200</param>
-      <param name="LF_wheel_joint_id">1</param>
-      <param name="RF_wheel_joint_id">2</param>
-      <param name="LB_wheel_joint_id">3</param>
-      <param name="RB_wheel_joint_id">4</param>
+      <param name="opencr_id">200</param> <!-- OpenCR board's Dynamixel ID (usually 200) -->
+
+      <!-- Dynamixel ID mapping for each joint -->
+      <param name="LF_wheel_joint_id">1</param> <!-- Replace 1 with actual Dynamixel ID -->
+      <param name="RF_wheel_joint_id">2</param> <!-- Replace 2 with actual Dynamixel ID -->
+      <param name="LB_wheel_joint_id">3</param> <!-- Replace 3 with actual Dynamixel ID -->
+      <param name="RB_wheel_joint_id">4</param> <!-- Replace 4 with actual Dynamixel ID -->
+
     </hardware>
+
+    <!-- Define the joints that ros2_control will manage -->
     <joint name="LF_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
+
     <joint name="RF_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
+
     <joint name="LB_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
+
     <joint name="RB_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
+
   </ros2_control>
-  -->
 
 </robot>

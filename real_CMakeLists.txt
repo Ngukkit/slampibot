@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.8)
 project(slampibot_gazebo)
 
@@ -7,53 +8,17 @@ endif()
 
 # find dependencies for the real robot
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
+find_package(rclcpp REQUIRED) # Still needed for launch files and general ROS2 environment
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(std_srvs REQUIRED)
-find_package(DynamixelSDK REQUIRED) # Find DynamixelSDK
+# DynamixelSDK, controller_manager, hardware_interface, diff_drive_controller, pluginlib are no longer needed for building custom C++ nodes for the real robot
 
-# --- Executable for the Real Robot Driver ---
-# This builds the C++ code that communicates with your OpenCR board.
-add_executable(real_driver_node
-  src/real_driver_node.cpp
-  src/EduDrive.cpp
-  src/MotorController.cpp
-  src/Odometry.cpp
-  src/Matrix.cpp
-  src/RPiAdapterBoard.cpp
-  src/RPiExtensionBoard.cpp
-  src/PowerManagementBoard.cpp
-  src/dynamixel/DynamixelSerialPort.cpp # Add DynamixelSerialPort source
-  # src/can/SocketCAN.cpp # Remove SocketCAN related sources
-  # src/can/SocketCANObserver.cpp
-  # src/can/canprotocol.cpp
-)
-
-# Include directories for Dynamixel SDK
-target_include_directories(real_driver_node PRIVATE
-  ${DynamixelSDK_INCLUDE_DIRS}
-)
-
-ament_target_dependencies(real_driver_node 
-    rclcpp 
-    geometry_msgs 
-    nav_msgs 
-    sensor_msgs 
-    tf2_ros
-    std_srvs
-)
-
-target_link_libraries(real_driver_node 
-  ${DynamixelSDK_LIBRARIES} # Link DynamixelSDK libraries
-)
-
-install(TARGETS
-  real_driver_node
-  DESTINATION lib/${PROJECT_NAME}
-)
+# --- No custom C++ executable for the real robot in this approach ---
+# The OpenCR board runs the firmware, and rosserial_python bridges the communication.
+# If you need to build any custom C++ nodes for the real robot, add them here.
 
 # Install launch files, URDF, RViz configs etc. for the real robot
 install(DIRECTORY 
