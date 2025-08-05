@@ -1,6 +1,6 @@
 # slampibot_gazebo - 로봇 구동 및 시뮬레이션 패키지
 
-## 버전: v0.14
+## 버전: v0.15
 
 이 패키지는 4륜 구동 로봇의 구동 및 시뮬레이션을 위한 ROS2 드라이버와 설정 파일을 포함합니다. 특히, Dynamixel XL430 모터와 OpenCR 1.0 보드를 사용하는 실제 로봇 구동에 초점을 맞춰 개발되었습니다.
 
@@ -9,6 +9,7 @@
 *   **실제 로봇 구동**: Raspberry Pi 5, OpenCR 1.0 보드, Dynamixel XL430 모터, 라이다, 카메라를 사용하여 4륜 구동 로봇을 제어합니다.
 *   **시뮬레이션**: Gazebo 환경에서 로봇 모델을 시뮬레이션하고 제어합니다.
 *   **기구학 지원**: 4륜 독립 구동 로봇의 역기구학 및 순기구학 계산을 지원하여 다양한 움직임(전진, 횡이동, 회전)을 구현합니다.
+*   **서빙 로봇 기능**: 웨이포인트 내비게이션을 통해 특정 목적지(숫자로 선택)로 이동하고 복귀하는 기능을 구현합니다.
 
 ## 2. 주요 구성 요소
 
@@ -16,7 +17,7 @@
 *   **통신**: USB-Serial 통신 (rosserial_python 기반)
 *   **ROS2 배포판**: Humble (예상)
 
-## 3. 파일 구조 및 현재 상태 (v0.14 기준)
+## 3. 파일 구조 및 현재 상태 (v0.15 기준)
 
 ### 3.1. 로봇 모델 정의 (URDF)
 
@@ -27,7 +28,7 @@
 ### 3.2. ROS2 Launch 파일
 
 *   **`launch/real_robot.launch.py`**: 실제 로봇 구동을 위한 Launch 파일입니다. `rosserial_python`을 사용하여 OpenCR 보드와 통신하고, `robot_state_publisher`, 라이다/카메라 드라이버를 실행합니다.
-*   **`launch/real_nav.launch.py`**: 실제 로봇에서 내비게이션 스택(Nav2)을 구동하기 위한 Launch 파일입니다. `rosserial_python`을 포함합니다.
+*   **`launch/real_nav.launch.py`**: 실제 로봇에서 내비게이션 스택(Nav2)을 구동하기 위한 Launch 파일입니다. `rosserial_python`을 포함하며, 웨이포인트 내비게이션 기능을 위한 `WaypointCommander` 노드를 포함합니다.
 *   **`launch/spb_spawn_space.launch.py`**: Gazebo 시뮬레이션 구동을 위한 Launch 파일입니다. `gazebo_ros_diff_drive` 플러그인을 사용하여 4륜 스키드 스티어 로봇을 시뮬레이션합니다.
 
 ### 3.3. 로봇 드라이버 코드
@@ -44,6 +45,7 @@
 *   **`parameter/edu_drive_edu_bot.yaml`**: `real_driver_node` (EduDrive 기반)에 전달되는 파라미터들을 정의합니다. (현재 `rosserial_python` 방식에서는 직접 사용되지 않음)
 *   **`parameter/ros_controllers.yaml`**: `ros2_control` 기반의 `diff_drive_controller` 설정을 정의합니다. (현재 `rosserial_python` 방식에서는 직접 사용되지 않음)
 *   **`parameter/spb_nav2_params.yaml`**: 내비게이션 스택(Nav2)에 전달되는 파라미터들을 정의합니다. 차동 구동 로봇에 적합한 설정으로 시작합니다.
+*   **`parameter/waypoints.yaml`**: 서빙 로봇의 목적지(웨이포인트)들을 정의하는 파일입니다. 각 웨이포인트는 ID, 이름, 로봇의 위치 및 방향 정보를 포함합니다.
 *   **`parameter/README.md`**: `edu_drive_edu_bot.yaml` 파일의 내용과 각 파라미터의 의미를 설명하는 한국어 문서입니다.
 
 ### 3.5. 기타 문서
@@ -78,12 +80,20 @@
     *   **실제 로봇 구동**: OpenCR 보드에 `turtlebot3_core.ino` 펌웨어를 업로드하고, 라즈베리파이에서는 `rosserial_python` 노드를 사용하여 OpenCR과 통신합니다. OpenCR이 ROS 토픽을 직접 발행/구독하므로, 라즈베리파이 측의 복잡한 C++ 드라이버 코드(EduDrive, ros2_control 하드웨어 인터페이스)는 더 이상 필요 없습니다. 
     *   **시뮬레이션**: `gazebo_ros_diff_drive` 플러그인을 사용하여 4륜 스키드 스티어 로봇의 움직임을 Gazebo에서 성공적으로 시뮬레이션하고 제어할 수 있습니다. RViz에서도 로봇 모델이 올바르게 표시되고 움직입니다.
 
-### v0.14 (현재 버전)
+### v0.14 (이전 버전)
 
 *   **실제 로봇 구동 방식 확정**: `turtlebot3_core.ino` 펌웨어와 `rosserial_python`을 사용하는 방식으로 최종 확정되었습니다. 이에 따라 `real_CMakeLists.txt` 및 관련 C++ 드라이버 코드(EduDrive, ros2_control 하드웨어 인터페이스)는 제거되었습니다.
 *   **시뮬레이션 환경 안정화**: `gazebo_ros_diff_drive` 플러그인을 사용하여 Gazebo에서 4륜 스키드 스티어 로봇의 움직임을 성공적으로 시뮬레이션하고 RViz와 연동하는 것이 확인되었습니다.
 *   **Nav2 런처 추가**: 실제 로봇에서 Nav2 스택을 구동하기 위한 `launch/real_nav.launch.py` 파일이 추가되었습니다.
 *   **파라미터 파일 업데이트**: `parameter/edu_drive_edu_bot.yaml`이 차동 구동 로봇의 기구학에 맞게 업데이트되었으며, `parameter/spb_nav2_params.yaml`이 Nav2 스택의 기본 파라미터로 추가되었습니다.
+
+### v0.15 (현재 버전)
+
+*   **서빙 로봇 기능 구현**: `nav2_waypoint_follower`를 활용한 웨이포인트 내비게이션 기능이 추가되었습니다. 사용자가 터미널에서 목적지 번호를 선택하면, 로봇이 해당 목적지로 이동하고 3초간 대기한 후 베이스 위치(ID 1)로 복귀하는 코스를 수행합니다.
+    *   **`program/src/robot_commander/robot_commander/waypoint_commander_node.py`**: 사용자 인터페이스 및 웨이포인트 관리 노드.
+    *   **`parameter/waypoints.yaml`**: 로봇의 목적지(웨이포인트)들을 정의하는 파일.
+    *   **`launch/real_nav.launch.py`**: `WaypointCommander` 노드를 포함하도록 업데이트되었습니다.
+*   **로봇 상태 표시**: `WaypointCommander` 노드에 배터리 전압, 모터 토크, 엔코더 값 등 로봇의 현재 상태를 터미널에 주기적으로 표시하는 기능이 추가되었습니다.
 
 ## 5. 다음 단계
 
