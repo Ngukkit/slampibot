@@ -1,0 +1,10 @@
+DynamixelSDK/
+opencr/
+opencr_core_1.0.7.tar.bz2
+opencr_update/
+opencr_update.tar.bz2
+rplidar_ros2/
+turtlebot3/
+turtlebot3_msgs/
+usb_cam/
+99-opencr-cdc.rules

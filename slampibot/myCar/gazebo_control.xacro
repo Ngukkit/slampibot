@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+                        <robot_description>/tmp/bmw.urdf</robot_description>
+      <parameters>/home/kkit/programming/ROS2/Ros_ws_book/src/slampibot_gazebo/config/my_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+</robot>

@@ -1,0 +1,4 @@
+slampibot_driver:
+  ros__parameters:
+    use_sim_time: true
+    verbosity: false

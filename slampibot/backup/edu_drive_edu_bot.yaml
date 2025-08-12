@@ -1,0 +1,50 @@
+/**:
+  ros__parameters:
+    usingPowerManagementBoard: true
+    verbosity: false
+    canInterface: can0 # Changed to can0 for general use
+    frequencyScale: 32
+    inputWeight: 0.2
+    maxPulseWidth: 100
+    timeout: 300
+    kp: 0.5
+    ki: 7.0
+    kd: 0.0
+    antiWindup: 1
+    responseMode: 0
+    
+    controllers: 2
+    
+    controller0:
+      canID: 0
+      drive0: #front right (RF_wheel_joint)
+        channel: 0
+        kinematics: [30.303, 0.0, 2.530] # Differential Drive Right Wheel Kinematics
+        gearRatio: 258.5 # Updated from XL430 spec
+        encoderRatio: 4096.0 # Updated from XL430 spec
+        rpmMax: 61.0 # Updated from XL430 spec
+        invertEnc: 1
+      drive1: #rear right (RB_wheel_joint)
+        channel: 1
+        kinematics: [30.303, 0.0, 2.530] # Differential Drive Right Wheel Kinematics
+        gearRatio: 258.5 # Updated from XL430 spec
+        encoderRatio: 4096.0 # Updated from XL430 spec
+        rpmMax: 61.0 # Updated from XL430 spec
+        invertEnc: 1
+
+    controller1:
+      canID: 1
+      drive0: #front left (LF_wheel_joint)
+        channel: 0
+        kinematics: [30.303, 0.0, -2.530] # Differential Drive Left Wheel Kinematics
+        gearRatio: 258.5 # Updated from XL430 spec
+        encoderRatio: 4096.0 # Updated from XL430 spec
+        rpmMax: 61.0 # Updated from XL430 spec
+        invertEnc: 1
+      drive1: #rear left (LB_wheel_joint)
+        channel: 1
+        kinematics: [30.303, 0.0, -2.530] # Differential Drive Left Wheel Kinematics
+        gearRatio: 258.5 # Updated from XL430 spec
+        encoderRatio: 4096.0 # Updated from XL430 spec
+        rpmMax: 61.0 # Updated from XL430 spec
+        invertEnc: 1

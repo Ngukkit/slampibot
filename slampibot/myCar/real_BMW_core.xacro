@@ -1,0 +1,214 @@
+<?xml version="1.0" ?>
+<robot name="BMW_Car" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- This file describes the real, physical properties of the robot. -->
+    <!-- All simulation-specific tags (<gazebo>, <transmission>) have been removed. -->
+    <!-- All dimensions are in meters. -->
+
+    <xacro:include filename="inertial_macros.xacro"/>
+    
+    <xacro:property name="wheel_mass" value="0.05"/>
+    <xacro:property name="chassis_mass" value="0.5"/> <!-- Adjusted mass for the chassis -->
+
+    <!-- Materials for RViz visualization -->
+    <material name="blue">
+        <color rgba="0 0.2 0.9 1"/>
+    </material>
+    <material name="gray">
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+    <material name="darkBlue">
+        <color rgba="0 0 0.1 1"/>
+    </material>
+
+    <!-- Base link for the robot model -->
+    <link name="dummy_link"/>
+
+    <!-- Chassis -->
+    <link name="chassis"> 
+        <visual> 
+            <geometry> 
+                <!-- Real dimensions: 0.257m x 0.150m x 0.002m -->
+                <box size="0.257 0.150 0.002"/> 
+            </geometry> 
+            <material name="darkBlue"/>
+        </visual>
+        <collision>
+            <geometry> 
+                <box size="0.257 0.150 0.002"/> 
+            </geometry> 
+        </collision>
+        <xacro:inertial_box mass="${chassis_mass}" x="0.257" y="0.150" z="0.002">
+            <origin rpy="0 0 0" xyz="0 0 0"/> 
+        </xacro:inertial_box>
+    </link>
+
+    <joint name="chassis_joint" type="fixed">
+        <parent link="dummy_link"/>
+        <child link="chassis"/>
+        <origin xyz="0 0 0.033"/> <!-- Place chassis so wheels are on the ground (z=radius) -->
+    </joint>
+
+    <!-- Wheel Properties -->
+    <xacro:property name="wheel_radius" value="0.033" /> <!-- 66mm diameter -->
+    <xacro:property name="wheel_length" value="0.017" /> <!-- 17mm height -->
+    <xacro:property name="wheel_pos_x" value="0.06425" /> <!-- chassis_x/2 - wheel_radius/2 (approx) -->
+    <xacro:property name="wheel_pos_y" value="0.0835" />  <!-- chassis_y/2 + wheel_length/2 -->
+
+    <!-- Front Left Wheel -->
+    <link name="LF_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </collision>
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_length}" radius="${wheel_radius}">
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+    <joint name="LF_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="LF_wheel"/>
+        <origin rpy="0 0 0" xyz="${wheel_pos_x} ${wheel_pos_y} 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <!-- Back Left wheel -->
+    <link name="LB_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </collision>
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_length}" radius="${wheel_radius}">
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>    
+    
+    <joint name="LB_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="LB_wheel"/>
+        <origin rpy="0 0 0" xyz="-${wheel_pos_x} ${wheel_pos_y} 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+    
+    <!-- Front Right Wheel -->
+    <link name="RF_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </collision>
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_length}" radius="${wheel_radius}">
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+    <joint name="RF_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="RF_wheel"/>
+        <origin rpy="0 0 0" xyz="${wheel_pos_x} -${wheel_pos_y} 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <!-- Back Right Wheel -->
+    <link name="RB_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+            </geometry>
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </collision>
+        <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_length}" radius="${wheel_radius}">
+            <origin rpy="1.5707 0 0" xyz="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+    <joint name="RB_wheel_joint" type="continuous">
+        <parent link="chassis"/>
+        <child link="RB_wheel"/>
+        <origin rpy="0 0 0" xyz="-${wheel_pos_x} -${wheel_pos_y} 0"/>
+        <axis xyz="0 1 0"/>
+    </joint>
+
+    <!-- Lidar Sensor -->
+    <link name="lidar_link">
+        <visual>
+            <geometry>
+                <cylinder radius="0.05" length="0.04"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder radius="0.05" length="0.04"/>
+            </geometry>
+        </collision>
+        <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05">
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+        </xacro:inertial_cylinder>
+    </link>
+
+    <joint name="lidar_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="lidar_link"/>
+        <origin rpy="0 0 0" xyz="0.10 0 0.02"/> <!-- Adjust position as needed -->
+    </joint>
+
+    <!-- Camera Sensor -->
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="0.03 0.05 0.03"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.03 0.05 0.03"/>
+            </geometry>
+        </collision>
+        <xacro:inertial_box mass="0.01" x="0.03" y="0.05" z="0.03">
+            <origin rpy="0 0 0" xyz="0 0 0"/> 
+        </xacro:inertial_box>
+    </link>
+    
+    <joint name="camera_joint" type="fixed">
+        <parent link="chassis"/>
+        <child link="camera_link"/>
+        <origin rpy="0 0 0" xyz="0.12 0 0.01"/> <!-- Adjust position as needed -->
+    </joint>
+
+</robot>

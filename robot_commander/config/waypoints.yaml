@@ -1,0 +1,37 @@
+waypoints:
+  - id: 1
+    name: "Base Station"
+    pose:
+      position:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 2
+    name: "Table 2"
+    pose:
+      position:
+        x: 1.0
+        y: 0.5
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 3
+    name: "Table 3"
+    pose:
+      position:
+        x: 2.0
+        y: -0.5
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0

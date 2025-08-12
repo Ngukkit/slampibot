@@ -1,0 +1,51 @@
+<?xml version="1.0"?> 
+<robot name="BMW_Car" xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+  <!-- 기본 core 내용 포함 -->
+  <xacro:include filename="BMW_core.xacro"/>
+
+  <gazebo>
+    <plugin name='skid_steer_drive' filename='libgazebo_ros_diff_drive.so'>
+      <!-- Update rate -->
+      <update_rate>500</update_rate>
+
+      <!-- Number of wheel pairs -->
+      <num_wheel_pairs>2</num_wheel_pairs>
+
+      <!-- wheels0 (Front Pair) -->
+      <left_joint>LF_wheel_joint</left_joint>
+      <right_joint>RF_wheel_joint</right_joint>
+
+      <!-- wheels1 (Rear Pair) -->
+      <left_joint>LB_wheel_joint</left_joint>
+      <right_joint>RB_wheel_joint</right_joint>
+
+      <!-- kinematics -->
+      <!-- Use the actual values from real_BMW_core.xacro -->
+      <wheel_separation>0.167</wheel_separation>
+      <wheel_diameter>0.066</wheel_diameter>
+
+      <!-- limits -->
+      <max_wheel_torque>200</max_wheel_torque>
+      <max_wheel_acceleration>10.0</max_wheel_acceleration>
+      
+      <!-- output -->
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>dummy_link</robot_base_frame>
+
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+
+      <!-- Control topic -->
+      <command_topic>cmd_vel</command_topic>
+
+      <!-- use_sim_time is usually handled by the launch file, but can be set here too -->
+      <!-- <ros_params_overrides>
+        <use_sim_time>true</use_sim_time>
+      </ros_params_overrides> -->
+
+    </plugin>
+  </gazebo>
+
+</robot>
