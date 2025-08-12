@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>table_obstacle_layer</name>
+  <version>0.1.0</version>
+  <description>Nav2 costmap layer to mark polygons (table obstacles) published as geometry_msgs/PolygonStamped</description>
+  <maintainer email="you@example.com">you</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>pluginlib</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav2_costmap_2d</depend>
+  <depend>costmap_2d</depend>
+  <depend>tf2_ros</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,10 @@
+<library path="lib/libtable_obstacle_layer.so">
+  <class name="table_obstacle_layer::PolygonLayer"
+         type="table_obstacle_layer::PolygonLayer"
+         base_class_type="nav2_costmap_2d::Layer">
+    <description>
+      Polygon layer that subscribes to geometry_msgs/PolygonStamped (topic /table_obstacle by default)
+      and marks the polygon area as lethal in the costmap.
+    </description>
+  </class>
+</library>
