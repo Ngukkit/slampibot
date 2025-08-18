@@ -20,6 +20,10 @@ def generate_launch_description():
     urdf_xacro = os.path.join(pkg_share, 'myCar', 'real_BMW.urdf.xacro')
     rviz_config = os.path.join(pkg_share, 'rviz', 'spb_urdf_map.rviz')    
     
+    # Parameter files
+    tb3_param_dir = os.path.join(pkg_share, 'parameter', 'slampibot.yaml')
+    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
+
     # Cartographer config for real robot
     cartographer_config = LaunchConfiguration('cartographer_config', default=os.path.join(pkg_share, 'params'))
     lua_config = LaunchConfiguration('lua_config', default='spb_cartographer_real.lua') # New real robot config
@@ -44,17 +48,13 @@ def generate_launch_description():
         output='screen',
         parameters=[robot_description_param, {'use_sim_time': use_sim_time}])
 
-    # rosserial_python node: Bridges communication between Raspberry Pi and OpenCR
-    rosserial_node = Node(
-        package='rosserial_python',
-        executable='rosserial_node.py',
-        name='rosserial_node',
-        output='screen',
-        parameters=[
-            {'port': '/dev/ttyACM0'}, # Adjust port if necessary
-            {'baud': 1000000} # Adjust baud rate if necessary
-        ]
-    )
+    # TurtleBot3 Node
+    turtlebot3_node = Node(
+        package='turtlebot3_node',
+        executable='turtlebot3_ros',
+        parameters=[tb3_param_dir],
+        arguments=['-i', usb_port],
+        output='screen')
 
     # Joint State Publisher: Maps 2-wheel joint states from OpenCR to 4-wheel URDF
     joint_state_publisher_node = Node(
@@ -83,12 +83,12 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time}.items()
     )
 
-    rviz_cmd = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        output='screen',
-        arguments=['-d', rviz_config])
+    # rviz_cmd = Node(
+    #     package='rviz2',
+    #     executable='rviz2',
+    #     name='rviz2',
+    #     output='screen',
+    #     arguments=['-d', rviz_config])
     
     rqt_robot_steering_cmd = Node(
         package='rqt_robot_steering',
@@ -121,12 +121,12 @@ def generate_launch_description():
     ld.add_action(set_domain)
     ld.add_action(dla_use_sim_time)
     ld.add_action(robot_state_publisher_node)    
-    ld.add_action(rosserial_node)
+    ld.add_action(turtlebot3_node)
     ld.add_action(joint_state_publisher_node)
     ld.add_action(lidar_driver_launch)
     ld.add_action(cartoprapher_cmd)
     ld.add_action(occupancy_grid_cmd)
-    ld.add_action(rviz_cmd)
+    # ld.add_action(rviz_cmd)
     ld.add_action(rqt_robot_steering_cmd)
 
     return ld

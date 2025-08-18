@@ -17,8 +17,10 @@ def generate_launch_description():
     # Use the real robot URDF
     urdf_xacro_path = os.path.join(pkg_share, 'myCar', 'real_BMW.urdf.xacro')
     rviz_config_path = os.path.join(pkg_share, 'rviz', 'spb_urdf.rviz')
-    # Nav2 parameters file (you need to create and tune this)
-    nav2_params_file = os.path.join(pkg_share, 'parameter', 'spb_nav2_params.yaml') # Activated
+    # Parameter files
+    nav2_params_file = os.path.join(pkg_share, 'parameter', 'spb_nav2_params.yaml')
+    tb3_param_dir = os.path.join(pkg_share, 'parameter', 'slampibot.yaml')
+    usb_port = LaunchConfiguration('usb_port', default='/dev/ttyACM0')
 
     # Process the URDF file
     robot_description_content = xacro.process_file(urdf_xacro_path).toxml()
@@ -37,17 +39,13 @@ def generate_launch_description():
         parameters=[robot_description_param, {'use_sim_time': use_sim_time}]
     )
 
-    # 2. rosserial_python node: Bridges communication between Raspberry Pi and OpenCR
-    rosserial_node = Node(
-        package='rosserial_python',
-        executable='rosserial_node.py',
-        name='rosserial_node',
-        output='screen',
-        parameters=[
-            {'port': '/dev/ttyACM0'}, # Adjust port if necessary
-            {'baud': 1000000} # Adjust baud rate if necessary
-        ]
-    )
+    # 2. TurtleBot3 Node: Bridges communication between Raspberry Pi and OpenCR
+    turtlebot3_node = Node(
+        package='turtlebot3_node',
+        executable='turtlebot3_ros',
+        parameters=[tb3_param_dir],
+        arguments=['-i', usb_port],
+        output='screen')
 
     # 3. Joint State Publisher: Maps 2-wheel joint states from OpenCR to 4-wheel URDF
     joint_state_publisher_node = Node(
@@ -113,24 +111,24 @@ def generate_launch_description():
         parameters=[{'waypoints_file': os.path.join(pkg_share, 'parameter', 'waypoints.yaml')}]
     )
 
-    # 8. RViz for visualization
-    rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config_path],
-        output='screen'
-    )
+    # 8. RViz for visualization (Commented out for Raspberry Pi)
+    # rviz_node = Node(
+    #     package='rviz2',
+    #     executable='rviz2',
+    #     name='rviz2',
+    #     arguments=['-d', rviz_config_path],
+    #     output='screen'
+    # )
 
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'),
         robot_state_publisher_node,
-        rosserial_node,
+        turtlebot3_node,
         joint_state_publisher_node, # Added joint_state_publisher
         lidar_driver_launch,
         nav2_launch,
         # slam_toolbox_launch, # Uncomment if using SLAM
-        # map_server_node,     # Uncomment if loading a static map
+        map_server_node,     # Uncomment if loading a static map
         waypoint_commander_node, # Added waypoint commander
-        rviz_node,
+        # rviz_node,
     ])

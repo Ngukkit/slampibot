@@ -1,85 +1,75 @@
-# 로봇 제작 주문 전 준비 사항 (소프트웨어)
+# 로봇 하드웨어 조립 후 작업 가이드 (v0.16 기준)
 
-이 문서는 실제 로봇(4륜 구동, Dynamixel XL430 모터, OpenCR 1.0 보드, 라즈베리파이, 라이다, 카메라)이 도착하기 전에 소프트웨어적으로 준비해야 할 핵심 사항들을 요약합니다.
+이 문서는 모터와 바퀴 등 모든 하드웨어 조립이 완료된 후, 실제 로봇의 구동을 테스트하고 SLAM 및 내비게이션을 실행하기 위한 소프트웨어 설정 및 실행 방법을 안내합니다.
 
-## 1. 로봇 모델 정의 (URDF)
+## 1. 필수 준비 사항
 
-*   **파일**: `myCar/real_BMW_core.xacro` 및 이를 통해 생성된 `myCar/real_BMW_core.urdf`
-*   **내용**: 로봇의 몸통, 바퀴, 센서(라이다, 카메라)의 실제 측정된 크기와 위치를 정확하게 반영합니다. 시뮬레이션 전용 태그는 모두 제거되었습니다.
-*   **목적**: RViz에서 로봇 모델을 정확하게 시각화하고, `robot_state_publisher`가 로봇의 TF(변환)를 올바르게 계산하도록 합니다.
-*   **상태**: 준비 완료.
+로봇을 구동하기 전에 다음 준비가 반드시 완료되어야 합니다.
 
-## 2. 실제 로봇 구동을 위한 ROS2 Launch 파일
+*   **하드웨어 조립**: 라즈베리파이, OpenCR 보드, Dynamixel XL-430 모터 (4개), 바퀴, 라이다, 카메라 등 모든 하드웨어가 물리적으로 조립되고 연결된 상태여야 합니다.
+*   **OpenCR 펌웨어 업로드**: **가장 중요한 단계입니다.** OpenCR 보드에 `turtlebot3_core.ino` 펌웨어를 업로드해야 합니다. 이 펌웨어는 OpenCR 보드가 ROS2와 통신할 수 있도록 해주는 핵심 소프트웨어입니다.
+    *   **주의:** 펌웨어 코드에서 통신 속도(Baudrate)가 **1000000**으로 설정되어 있는지 확인해야 합니다. 이는 우리 런치 파일의 `slampibot.yaml` 설정과 일치해야 합니다.
+*   **네트워크 설정**: 로봇의 라즈베리파이와 로봇을 제어할 원격 PC가 동일한 네트워크에 연결되어 있어야 합니다.
 
-*   **파일**: `launch/real_robot.launch.py` (기본 구동용), `launch/real_nav.launch.py` (내비게이션용)
-*   **내용**: Gazebo와 같은 시뮬레이션 관련 노드를 모두 제거하고, 실제 하드웨어 드라이버 노드(`real_driver_node`), `robot_state_publisher`, 그리고 라이다/카메라 드라이버를 실행하기 위한 구조를 갖추고 있습니다.
-*   **목적**: 실제 로봇 하드웨어를 ROS2 환경에서 구동합니다.
-*   **상태**: 준비 완료.
+## 2. 라즈베리파이 소프트웨어 설정
 
-## 3. 실제 로봇 드라이버 노드 (C++ 템플릿)
-
-*   **파일**: `src/real_driver_node.cpp`
-*   **내용**: `EduDrive` 시스템을 기반으로 하는 ROS2 노드의 뼈대입니다. USB-Serial 통신을 통해 OpenCR 보드 및 Dynamixel 모터와 통신하고, 센서 데이터를 읽어와 ROS 토픽으로 발행하는 기본적인 구조를 갖추고 있습니다.
-*   **목적**: 라즈베리파이와 OpenCR 보드 및 모터, 센서 간의 통신을 담당하고 로봇의 움직임을 제어합니다.
-*   **상태**: **구조는 준비 완료. 핵심 로직 구현 필요.**
-    *   **OpenCR 통신 방식**: `usb_to_dxl` 펌웨어를 사용하는 USB-Serial 통신 기반으로 코드가 수정되었습니다.
-    *   **핵심 로직 구현**: `src/real_driver_node.cpp` 내의 `EduDrive::receiveDynamixelData()` 함수와 `RPiAdapterBoard`, `RPiExtensionBoard`, `PowerManagementBoard` 클래스들의 실제 구현을 채워 넣어야 합니다. 이들은 `usb_to_dxl` 펌웨어의 통신 프로토콜에 맞춰 OpenCR 보드로부터 센서 데이터를 읽어오고 제어 명령을 보내야 합니다.
-
-## 4. 빌드 시스템 설정
-
-*   **파일**: `real_CMakeLists.txt`
-*   **내용**: `real_driver_node`와 그 의존성들(Dynamixel SDK 포함)을 올바르게 빌드하도록 설정되었습니다.
-*   **목적**: `real_driver_node` 실행 파일을 생성합니다.
-*   **상태**: 준비 완료.
-
-## 5. CAN 통신 환경 설정 가이드
-
-*   **파일**: `README.md` (현재 디렉토리 내)
-*   **내용**: 라즈베리파이 5에서 Docker를 사용하여 CAN 통신을 설정하는 방법에 대한 한국어 가이드입니다.
-*   **목적**: 라즈베리파이 호스트 OS와 Docker 컨테이너 간의 CAN 통신 환경을 구축합니다.
-*   **상태**: 준비 완료. (단, 현재 로봇은 USB-Serial 통신을 사용하므로 직접적인 관련은 적음)
-
-## 요약 및 실제 장비 도착 시 해야 할 일
-
-실제 로봇이 도착하기 전에 소프트웨어의 **기본적인 구조와 틀은 모두 준비되었습니다.**
-
-로봇이 도착하면, 다음의 **핵심 하드웨어 설정 및 소프트웨어 구현/튜닝 작업**에 집중해야 합니다.
-
-### 1. 하드웨어 조립 및 연결
-
-*   **라즈베리파이 5 초기 설정**: Raspberry Pi OS 설치 및 Docker 설치를 완료합니다.
-*   **OpenCR 1.0 보드 연결**: OpenCR 1.0 보드를 라즈베리파이와 USB 케이블로 연결합니다.
-*   **Dynamixel XL430 모터 연결**: 4개의 Dynamixel XL430 모터를 OpenCR 보드에 연결합니다.
-*   **라이다 및 카메라 연결**: 라이다와 카메라를 라즈베리파이에 연결합니다.
-
-### 2. OpenCR 1.0 펌웨어 업로드
-
-*   **`usb_to_dxl.ino` 펌웨어 업로드**: OpenCR 보드에 `usb_to_dxl.ino` 펌웨어를 업로드합니다. 이 펌웨어는 OpenCR을 USB-Serial 브릿지로 작동시킵니다.
-
-### 3. 라즈베리파이 소프트웨어 설정 및 빌드
-
-*   **Dynamixel SDK 설치**: 라즈베리파이에 Dynamixel SDK를 설치합니다. (ROS2 패키지 형태로 설치하는 것이 가장 편리합니다: `sudo apt install ros-humble-dynamixel-sdk`)
-*   **라이다 및 카메라 드라이버 설치**: 당신의 라이다 및 카메라 모델에 맞는 ROS2 드라이버를 설치합니다. (예: `sudo apt install ros-humble-rplidar-ros`)
-*   **`real_CMakeLists.txt` 활성화**: `real_CMakeLists.txt`를 활성화하고 `colcon build`를 실행하여 `real_driver_node`를 빌드합니다.
+1.  **ROS2 및 관련 패키지 설치**: 라즈베리파이에 ROS2 Humble, `turtlebot3_node`, `rplidar_ros` 등 필요한 모든 패키지가 설치되어 있어야 합니다.
+2.  **워크스페이스 클론 및 빌드**: 이 프로젝트(`slampibot_gazebo`)를 라즈베리파이의 ROS2 워크스페이스(`ros2_ws/src`)에 클론하고, `colcon build` 명령으로 전체 워크스페이스를 빌드합니다.
     ```bash
-    # 프로젝트 루트 디렉토리에서
-    mv CMakeLists.txt CMakeLists.txt.sim # 시뮬레이션용 백업
-    mv real_CMakeLists.txt CMakeLists.txt # 실제 로봇용 활성화
-    colcon build --packages-select slampibot_gazebo
+    cd ~/ros2_ws
+    colcon build
     ```
 
-### 4. `real_driver_node.cpp` 핵심 로직 완성
+## 3. 실행 및 테스트 가이드
 
-*   **OpenCR 센서 데이터 읽기**: `EduDrive::receiveDynamixelData()` 함수와 `RPiAdapterBoard`, `PowerManagementBoard` 클래스 내에서 OpenCR 보드로부터 IMU, 전압, 전류 등의 센서 데이터를 읽어오는 로직을 구현해야 합니다. 이는 OpenCR 펌웨어의 Dynamixel Control Table 문서를 참조하여 해당 데이터가 저장된 Dynamixel ID와 레지스터 주소를 파악한 후, Dynamixel SDK 함수를 사용하여 구현합니다.
-*   **서보 제어 구현**: `RPiExtensionBoard` 클래스의 `setServos()` 함수를 구현하여 서보 모터를 제어합니다. (만약 Dynamixel 서보라면 Dynamixel SDK 사용, 일반 서보라면 OpenCR 펌웨어의 해당 제어 방식 파악)
+모든 준비가 완료되면, 다음 단계에 따라 기능을 테스트할 수 있습니다. 각 런치 파일은 로봇(라즈베리파이)에서 실행합니다. RViz나 `rqt_robot_steering`과 같은 GUI 도구는 원격 PC에서 실행하여 로봇을 제어하고 모니터링합니다.
 
-### 5. 파라미터 파일 튜닝
+### 1단계: 기본 동작 및 키보드 조종 테스트
 
-*   **`parameter/edu_drive_edu_bot.yaml` 파라미터 튜닝**: 로봇의 실제 `kinematics` 값, `canID` (이제 Dynamixel ID), `gearRatio`, `encoderRatio`, `rpmMax` 등을 당신의 로봇에 맞게 정확히 입력해야 합니다.
+*   **목적**: 모터가 정상적으로 작동하는지, 로봇이 의도한 대로 움직이는지 확인하는 초기 하드웨어 테스트입니다.
+*   **실행 명령어 (라즈베리파이 터미널):**
+    ```bash
+    source ~/ros2_ws/install/setup.bash
+    ros2 launch slampibot_gazebo real_robot.launch.py
+    ```
+*   **예상 결과**:
+    *   명령 실행 시, **새로운 터미널 창이 나타나며** 키보드 조종 노드(`teleop_keyboard`)가 실행됩니다.
+    *   해당 터미널 창에서 `w, a, s, d, x` 키를 사용하여 로봇을 직접 제어할 수 있습니다.
+    *   로봇이 키보드 입력에 따라 정상적으로 움직인다면, `turtlebot3_node`와 OpenCR 펌웨어 간의 통신이 성공적으로 이루어진 것입니다.
+    *   (원격 PC) `rviz2`를 실행하여 로봇 모델이 올바르게 표시되는지, TF가 정상적으로 발행되는지 확인할 수 있습니다.
 
-### 6. 로봇 구동 및 내비게이션 시작
+### 2단계: SLAM (지도 생성)
 
-*   **기본 구동**: `ros2 launch slampibot_gazebo real_robot.launch.py`를 실행하여 로봇이 `rqt_robot_steering`으로 제어되는지 확인합니다.
-*   **내비게이션**: `parameter/spb_nav2_params.yaml`을 튜닝하고 `ros2 launch slampibot_gazebo real_nav.launch.py`를 실행하여 내비게이션 기능을 테스트합니다.
+*   **목적**: 로봇을 조종하여 주변 환경의 지도를 생성하고 저장합니다.
+*   **실행 명령어 (라즈베리파이 터미널):**
+    ```bash
+    source ~/ros2_ws/install/setup.bash
+    ros2 launch slampibot_gazebo real_cartographer.launch.py
+    ```
+*   **작업 순서**:
+    1.  위 명령어로 SLAM 관련 노드들을 모두 실행합니다.
+    2.  **원격 PC**에서 `rqt_robot_steering`을 실행하여 로봇을 부드럽게 조종하며 지도 영역을 탐색합니다.
+        ```bash
+        rqt_robot_steering
+        ```
+    3.  **원격 PC**에서 `rviz2`를 실행하고, `/map` 토픽을 추가하여 실시간으로 지도가 만들어지는 과정을 확인합니다.
+    4.  지도가 완성되면, **원격 PC의 새 터미널**에서 아래 명령어를 실행하여 지도를 저장합니다. (`~/map`은 원하는 경로와 파일 이름으로 변경 가능)
+        ```bash
+        ros2 run nav2_map_server map_saver_cli -f ~/map
+        ```
 
-이러한 준비가 완료되면, 실제 로봇을 구동하고 센서 데이터를 받아보며 내비게이션 및 SLAM 개발을 시작할 수 있을 것입니다.
+### 3단계: 내비게이션 (자율 주행)
+
+*   **목적**: 2단계에서 생성하고 저장한 지도를 이용해 로봇이 자율적으로 목표 지점까지 주행하도록 합니다.
+*   **사전 준비**: `maps` 폴더에 `spb_map.yaml`과 `spb_map.pgm` 파일이 저장되어 있어야 합니다. (이름이 다르다면 `real_nav.launch.py` 파일 수정 필요)
+*   **실행 명령어 (라즈베리파이 터미널):**
+    ```bash
+    source ~/ros2_ws/install/setup.bash
+    ros2 launch slampibot_gazebo real_nav.launch.py
+    ```
+*   **작업 순서**:
+    1.  위 명령어로 내비게이션 스택을 포함한 모든 노드를 실행합니다.
+    2.  **원격 PC**에서 `rviz2`를 실행합니다. 로봇이 지도 상에 나타나고, 라이다 센서 데이터가 지도와 일치하는 것을 확인합니다.
+    3.  RViz의 `2D Pose Estimate` 툴을 사용하여 로봇의 현재 위치와 방향을 지도 상에 지정해줍니다. (초기 위치 추정)
+    4.  RViz의 `Nav2 Goal` 툴을 사용하여 목표 지점을 클릭하면, 로봇이 해당 지점까지 자율적으로 경로를 계획하고 주행합니다.
+    5.  `waypoint_commander_node`가 함께 실행되므로, 웹 인터페이스를 통한 웨이포인트 주행도 테스트할 수 있습니다.
