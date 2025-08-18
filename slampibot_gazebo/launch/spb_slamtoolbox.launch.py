@@ -23,10 +23,11 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue # Add this import
 
 def generate_launch_description():
 
-    set_domain = SetEnvironmentVariable('ROS_DOMAIN_ID', '30')
+    set_domain = SetEnvironmentVariable('ROS_DOMAIN_ID', '66')
     pkg_share = FindPackageShare(package='slampibot_gazebo').find('slampibot_gazebo')
     pkg_gazebo_ros = FindPackageShare(package='gazebo_ros').find('gazebo_ros')   
     urdf_xacro = os.path.join(pkg_share, 'myCar', 'BMW.urdf.xacro')
@@ -70,7 +71,14 @@ def generate_launch_description():
         executable='robot_state_publisher',
         output='screen',
         parameters=[{'use_sim_time': use_sim_time, 
-                     'robot_description': Command(['xacro',' ', urdf_xacro])}])
+                     'robot_description': ParameterValue(Command(['xacro',' ', urdf_xacro]), value_type=str)}])
+
+    joint_state_publisher_cmd = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        parameters=[{'use_sim_time': use_sim_time}],
+        output='screen')
     
     rviz_cmd = Node(
         package='rviz2',
@@ -88,7 +96,15 @@ def generate_launch_description():
     async_slam_toolbox_cmd = Node(
         parameters=[
           slam_params_file,
-          {'use_sim_time': use_sim_time}
+          {'use_sim_time': use_sim_time},
+          {'qos_overrides': {
+              '/scan': {
+                  'reliability': 'best_effort',
+                  'durability': 'volatile',
+                  'history': 'keep_last',
+                  'depth': 10,
+              }
+          }}
         ],
         package='slam_toolbox',
         executable='async_slam_toolbox_node',
@@ -102,6 +118,7 @@ def generate_launch_description():
     ld.add_action(dla_slam_params_file)
     ld.add_action(gazebo_server_cmd)
     ld.add_action(gazebo_client_cmd)
+    ld.add_action(joint_state_publisher_cmd)
     ld.add_action(robot_state_publisher_cmd)    
     ld.add_action(rviz_cmd)
     ld.add_action(rqt_robot_steering_cmd)

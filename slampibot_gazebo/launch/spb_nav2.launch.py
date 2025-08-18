@@ -17,6 +17,7 @@
 # Author: Leo Cho
 
 import os
+import xacro
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.conditions import IfCondition
@@ -25,12 +26,18 @@ from launch.substitutions import Command, LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from ament_index_python.packages import get_package_share_directory
+from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
 
   pkg_gazebo_ros = get_package_share_directory("gazebo_ros")
   pkg_share = get_package_share_directory("slampibot_gazebo")
-  default_model_path = os.path.join(pkg_share, 'urdf/spb_urdf_gazebo.xacro')  
+  default_model_path = os.path.join(pkg_share, 'myCar', 'BMW.urdf.xacro')  
+  # Process the URDF file and create the robot_description parameter
+  robot_description_content = xacro.process_file(default_model_path).toxml()
+  robot_description_param = {
+      "robot_description": ParameterValue(robot_description_content, value_type=str)
+  }  
   default_rviz_config_path = os.path.join(pkg_share, 'rviz/nav2_config.rviz')      
   world_path = os.path.join(pkg_share, 'worlds', 'spb_building_slampibot.world') 
   nav2_dir = get_package_share_directory('nav2_bringup')
@@ -45,7 +52,7 @@ def generate_launch_description():
   headless = LaunchConfiguration('headless')
   map_yaml_file = LaunchConfiguration('map')
   model = LaunchConfiguration('model')
-  namespace = LaunchConfiguration('namespace')
+  
   params_file = LaunchConfiguration('params_file')
   rviz_config_file = LaunchConfiguration('rviz_config_file')
   slam = LaunchConfiguration('slam')
@@ -59,15 +66,9 @@ def generate_launch_description():
   remappings = [('/tf', 'tf'),
                 ('/tf_static', 'tf_static')]
   
-  declare_namespace_cmd = DeclareLaunchArgument(
-    name='namespace',
-    default_value='Twice',
-    description='Top-level namespace')
+  
 
-  declare_use_namespace_cmd = DeclareLaunchArgument(
-    name='use_namespace',
-    default_value='true',
-    description='Whether to apply a namespace to the navigation stack')
+  
         
   declare_autostart_cmd = DeclareLaunchArgument(
     name='autostart', 
@@ -149,9 +150,8 @@ def generate_launch_description():
     condition=IfCondition(use_robot_state_pub),
     package='robot_state_publisher',
     executable='robot_state_publisher',
-    namespace=namespace,
-    parameters=[{'use_sim_time': use_sim_time, 
-    'robot_description': Command(['xacro ', model])}],
+    
+    parameters=[robot_description_param, {'use_sim_time': use_sim_time}],
     remappings=remappings,    
     )
 
@@ -165,9 +165,7 @@ def generate_launch_description():
 
   start_ros2_navigation_cmd = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
-    launch_arguments = {'namespace': namespace,
-                        'use_namespace': use_namespace,
-                        'slam': slam,
+    launch_arguments = {'slam': slam,
                         'map': map_yaml_file,
                         'use_sim_time': use_sim_time,
                         'params_file': params_file,
@@ -175,9 +173,9 @@ def generate_launch_description():
                         'autostart': autostart}.items())
 
   ld = LaunchDescription()
-  #ld.add_action(SetEnvironmentVariable('ROS_DOMAIN_ID', '66'))
-  ld.add_action(declare_namespace_cmd)
-  ld.add_action(declare_use_namespace_cmd)
+  ld.add_action(SetEnvironmentVariable('ROS_DOMAIN_ID', '66'))
+  #ld.add_action(declare_namespace_cmd)
+  #ld.add_action(declare_use_namespace_cmd)
   ld.add_action(declare_autostart_cmd)
   ld.add_action(declare_bt_xml_cmd)
   ld.add_action(declare_map_yaml_cmd)
@@ -192,8 +190,8 @@ def generate_launch_description():
   ld.add_action(declare_use_simulator_cmd)
   ld.add_action(declare_world_cmd)
 
-  ld.add_action(start_gazebo_server_cmd)
-  ld.add_action(start_gazebo_client_cmd)
+#  ld.add_action(start_gazebo_server_cmd)
+#  ld.add_action(start_gazebo_client_cmd)
   ld.add_action(start_robot_state_publisher_cmd)
   ld.add_action(start_rviz_cmd)
   ld.add_action(start_ros2_navigation_cmd)

@@ -1,0 +1,9 @@
+table_obstacle_node:
+  ros__parameters:
+    tag_ids: [1, 2]
+    table_width: 0.6
+    table_height: 1.0
+
+apriltag: # Node name for apriltag_node
+  ros__parameters:
+    size: 0.050

@@ -113,7 +113,7 @@ class WaypointCommander(Node):
         goal_msg = FollowWaypoints.Goal()
         goal_msg.waypoints = [pose_stamped] # 단일 웨이포인트 전송
         
-        self.get_logger().info(f'Sending goal to waypoint ID {waypoint_data['id']}: {waypoint_data['name']}')
+        self.get_logger().info(f"Sending goal to waypoint ID {waypoint_data['id']}: {waypoint_data['name']}")
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg)
         
@@ -129,10 +129,10 @@ class WaypointCommander(Node):
         
         result = self._get_result_future.result().result
         if result.status == FollowWaypoints.Result.SUCCEEDED:
-            self.get_logger().info(f'Waypoint navigation to ID {waypoint_data['id']} succeeded!')
+            self.get_logger().info(f"Waypoint navigation to ID {waypoint_data['id']} succeeded!")
             return True
         else:
-            self.get_logger().error(f'Waypoint navigation to ID {waypoint_data['id']} failed with status: {result.status}')
+            self.get_logger().error(f"Waypoint navigation to ID {waypoint_data['id']} failed with status: {result.status}")
             return False
 
     def send_waypoint_callback(self, request, response):

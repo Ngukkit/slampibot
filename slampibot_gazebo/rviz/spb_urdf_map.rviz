@@ -7,9 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1
-        - /TF1/Tree1/map1
-        - /RobotModel1
-        - /Map1
       Splitter Ratio: 0.5
     Tree Height: 355
   - Class: rviz_common/Selection
@@ -29,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -37,7 +34,7 @@ Visualization Manager:
       Cell Size: 1
       Class: rviz_default_plugins/Grid
       Color: 160; 160; 164
-      Enabled: false
+      Enabled: true
       Line Style:
         Line Width: 0.029999999329447746
         Value: Lines
@@ -50,7 +47,7 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
-      Value: false
+      Value: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Frame Timeout: 15
@@ -58,25 +55,15 @@ Visualization Manager:
         All Enabled: true
         base_footprint:
           Value: true
-        base_link:
+        camera:
           Value: true
-        camera_link:
+        chassis:
           Value: true
-        camera_optical_link:
+        dummy_link:
           Value: true
-        front_caster:
-          Value: true
-        imu_link:
-          Value: true
-        lidar_link:
-          Value: true
-        map:
+        lidar:
           Value: true
         odom:
-          Value: true
-        wheel_left_link:
-          Value: true
-        wheel_right_link:
           Value: true
       Marker Scale: 0.5
       Name: TF
@@ -84,23 +71,15 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                camera_link:
-                  camera_optical_link:
-                    {}
-                front_caster:
-                  {}
-                imu_link:
-                  {}
-                lidar_link:
-                  {}
-                wheel_left_link:
-                  {}
-                wheel_right_link:
-                  {}
+        dummy_link:
+          chassis:
+            camera:
+              {}
+            lidar:
+              {}
+        odom:
+          base_footprint:
+            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -113,53 +92,49 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /Twice/robot_description
+        Value: /robot_description
       Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
+        LB_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        LF_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
+        RB_wheel:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        camera_link:
+        RF_wheel:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        camera_optical_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        front_caster:
+        camera:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        imu_link:
+        chassis:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        lidar_link:
+        dummy_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        wheel_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        wheel_right_link:
+        lidar:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -198,7 +173,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 0
@@ -216,10 +191,10 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /Twice/scan
+        Value: /scan
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Class: rviz_default_plugins/Map
       Color Scheme: map
@@ -244,7 +219,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: base_footprint
+    Fixed Frame: chassis
     Frame Rate: 30
   Name: root
   Tools:
@@ -287,25 +262,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 10.015856742858887
+      Distance: 1.001585602760315
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -1.3424949645996094
-        Y: -2.4289097785949707
-        Z: -0.0013622620608657598
-      Focal Shape Fixed Size: true
+        X: 0
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 0.7853981852531433
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 4.717389106750488
+      Yaw: 0.7853981852531433
     Saved: ~
 Window Geometry:
   Displays:
@@ -325,5 +300,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 178
-  Y: 95
+  X: 105
+  Y: 27
