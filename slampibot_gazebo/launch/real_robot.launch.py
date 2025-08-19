@@ -60,10 +60,9 @@ def generate_launch_description():
 
     # 7. Lidar and Camera Drivers (uncomment when needed)
     lidar_driver_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory('rplidar_ros'), 'launch'),
-            '/rplidar.launch.py'
-        ]),
+        PythonLaunchDescriptionSource(
+            os.path.join(get_package_share_directory('sllidar_ros2'), 'launch', 'sllidar_a1_launch.py')
+        ),
         launch_arguments={'use_sim_time': use_sim_time}.items()
     )
 
@@ -92,7 +91,7 @@ def generate_launch_description():
         robot_state_publisher_node,
         turtlebot3_node,
         joint_state_publisher_node,
-        # lidar_driver_launch, # Uncomment when you have the lidar driver
+        lidar_driver_launch,
         # rviz_node,
         teleop_keyboard_node,
     ])
