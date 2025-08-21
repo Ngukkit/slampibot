@@ -94,13 +94,14 @@ def generate_launch_description():
     #     launch_arguments={'use_sim_time': use_sim_time}.items()
     # )
     # b) Map Server for loading a static map:
-    # map_server_node = Node(
-    #     package='nav2_map_server',
-    #     executable='map_server',
-    #     name='map_server',
-    #     output='screen',
-    #     parameters=[{'yaml_filename': os.path.join(pkg_share, 'maps', 'your_map_name.yaml')}, {'use_sim_time': use_sim_time}]
-    # )
+    map_server_node = Node(
+        package='nav2_map_server',
+        executable='map_server',
+        name='map_server',
+        output='screen',
+        parameters=[{'yaml_filename': os.path.join(pkg_share, 'maps', 'my_map.yaml')}, 
+                    {'use_sim_time': use_sim_time}]
+    )
 
     # 7. Custom Waypoint Commander Node
     waypoint_commander_node = Node(

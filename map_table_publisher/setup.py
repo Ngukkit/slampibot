@@ -26,6 +26,15 @@ setup(
         'console_scripts': [
             'tag_publisher_node = map_table_publisher.tag_publisher:main',
             'polygon_publisher_node = map_table_publisher.polygon_publisher:main',
+            'ceiling_camera_processor = map_table_publisher.ceiling_camera_processor:main',
+            'improved_camera_processor = map_table_publisher.improved_camera_processor:main',
+            'calibrated_camera_processor = map_table_publisher.calibrated_camera_processor:main',
+            'camera_calibration_node = map_table_publisher.camera_calibration_node:main',
+            'debug_visualizer = map_table_publisher.debug_visualizer:main',
+            'rectified_camera_info_publisher = map_table_publisher.rectified_camera_info_publisher:main',
+            'raw_ceiling_camera_processor = map_table_publisher.raw_ceiling_camera_processor:main',
+            'apriltag_persistence_node = map_table_publisher.apriltag_persistence_node:main',
+            'apriltag_tracker_node = map_table_publisher.apriltag_tracker_node:main',
         ],
     },
 )

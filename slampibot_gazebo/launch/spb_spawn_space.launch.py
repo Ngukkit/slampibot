@@ -113,6 +113,6 @@ def generate_launch_description():
         robot_state_publisher_node,
         joint_state_publisher_node, # Re-added joint_state_publisher
         delayed_spawn_entity, # Spawn robot into Gazebo
-        rviz_cmd,
+        # rviz_cmd,
         rqt_robot_steering_cmd,
     ])

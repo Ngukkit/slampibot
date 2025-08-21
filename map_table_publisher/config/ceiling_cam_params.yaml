@@ -1,0 +1,8 @@
+# params.yaml
+ceiling_camera_processor:
+  ros__parameters:
+    robot_tag_id: 0
+    landmark_tags:
+      100: {x: 0.0,  y: 5.0}   # 좌상
+      200: {x: 8.0,  y: 0.0}   # 우하
+      300: {x: 4.0,  y: 2.5}   # 중심

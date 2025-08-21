@@ -59,8 +59,27 @@ local_costmap:
       # ... (local costmap parameters) ...
       robot_radius: 0.1285 # Half of chassis length (0.257/2) or tune based on actual robot footprint
       plugins: ["obstacle_layer", "inflation_layer", "table_obstacle_layer::PolygonLayer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: true
+          marking: true
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55
       table_obstacle_layer::PolygonLayer:
         plugin: "table_obstacle_layer::PolygonLayer"
+        polygon_topics: ["/table_obstacles/table1", "/table_obstacles/table2"]
 
 global_costmap:
   global_costmap:
@@ -69,8 +88,30 @@ global_costmap:
       # ... (global costmap parameters) ...
       robot_radius: 0.1285 # Half of chassis length (0.257/2) or tune based on actual robot footprint
       plugins: ["static_layer", "obstacle_layer", "inflation_layer", "table_obstacle_layer::PolygonLayer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: true
+          marking: true
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55
       table_obstacle_layer::PolygonLayer:
         plugin: "table_obstacle_layer::PolygonLayer"
+        polygon_topics: ["/table_obstacles/table1", "/table_obstacles/table2"]
 
 
 map_server:
