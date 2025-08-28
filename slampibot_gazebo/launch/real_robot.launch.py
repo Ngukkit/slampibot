@@ -38,7 +38,13 @@ def generate_launch_description():
     turtlebot3_node = Node(
         package='turtlebot3_node',
         executable='turtlebot3_ros',
-        parameters=[tb3_param_dir],
+        parameters=[
+            tb3_param_dir,
+            {'opencr.id': 200},
+            {'opencr.baud_rate': 1000000},
+            {'opencr.protocol_version': 2.0},
+            {'namespace': 'tb3'} # Hardcode namespace for now
+        ],
         arguments=['-i', usb_port],
         output='screen')
 

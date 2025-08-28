@@ -82,9 +82,13 @@
 
 ## 4단계: 최종 시스템 실행
 
-이제 모든 준비가 끝났습니다. 최종적으로 Nav2와 천장 카메라를 함께 실행합니다.
+이제 모든 준비가 끝났습니다. 최종적으로 Nav2와 안정화된 천장 카메라 시스템을 함께 실행합니다.
 
-1.  SLAM 노드 대신, `map_server`와 `amcl` (위치 추정) 노드를 포함한 Nav2 스택을 실행합니다.
-2.  우리가 디버깅을 완료한 천장 카메라 시스템(`test_static_world.launch.py`)을 동시에 실행합니다.
+1.  SLAM 노드 대신, `map_server`와 `amcl` (위치 추정) 노드를 포함한 Nav2 스택을 실행합니다. (예: `ros2 launch turtlebot3_navigation2 navigation2.launch.py map:=~/my_map.yaml`)
+
+2.  안정성이 개선된 천장 카메라 시스템을 동시에 실행합니다. 이 런치 파일은 `apriltag_persistence_node`를 포함하여, 정지 상태에서도 AprilTag 감지가 끊기지 않도록 보장해줍니다.
+    ```bash
+    ros2 launch map_table_publisher calibrated_persistent.launch.py
+    ```
 
 이제 `amcl`이 LiDAR 지도를 기준으로 로봇의 위치를 추정하고, 천장 카메라는 `ceiling_cam_params.yaml`에 업데이트된 좌표를 기준으로 테이블의 위치를 계산합니다. 두 시스템이 동일한 `map` 좌표계를 공유하기 때문에, **카메라가 발견한 테이블 장애물이 Nav2의 LiDAR 지도 위에 정확한 위치에 표시**되게 됩니다.

@@ -26,7 +26,7 @@ class AprilTagPersistenceNode(Node):
         # persistence dictionary
         # tag_id -> (AprilTagDetection, last_seen_time)
         self.persisted_tags = {}
-        self.persist_time = 1.0  # 초 단위 유지 시간
+        self.persist_time = 10.0  # 초 단위 유지 시간
 
         # timer: 주기적으로 publish
         self.timer = self.create_timer(0.05, self.publish_persistent_tags)

@@ -45,17 +45,16 @@ def generate_launch_description():
         parameters=[
             {
                 'video_device': '/dev/video0',
-                'image_width': 640,
-                'image_height': 480,
-                'framerate': 15.0, # Reduced from 30.0
+                'image_width': 1280,
+                'image_height': 720,
+                'framerate': 30.0,
                 'pixel_format': 'yuyv',
                 'camera_name': 'ceiling_camera',
                 'camera_info_url': 'package://map_table_publisher/config/camera_info.yaml',
                 'io_method': 'mmap',
                 'camera_frame_id': 'default_cam',
-                'brightness': 50,   # Added for testing static scene detection
-                'contrast': 50,     # Added for testing static scene detection
-                'exposure': 100     # Added for testing static scene detection
+                # Add your tuned parameters here if needed, e.g.:
+                # 'brightness': 80,
             }
         ],
         remappings=[
@@ -64,7 +63,15 @@ def generate_launch_description():
         ]
     )
 
-    # AprilTag detection node (using raw image directly)
+    # NEW: Image Preprocessor Node
+    image_preprocessor_node = Node(
+        package='map_table_publisher',
+        executable='image_preprocessor_node',
+        name='image_preprocessor_node',
+        output='screen'
+    )
+
+    # MODIFIED: AprilTag detection node now subscribes to the processed image
     apriltag_node = Node(
         package='apriltag_ros',
         executable='apriltag_node',
@@ -79,9 +86,10 @@ def generate_launch_description():
             {'tag_refine_decode': True}
         ],
         remappings=[
+            # ('image_rect', '/ceiling_camera/image_processed'), # Changed from /image_raw
             ('image_rect', '/ceiling_camera/image_raw'),
             ('camera_info', '/ceiling_camera/camera_info'),
-            ('detections', '/tag_detections') # Remap apriltag_node output to /tag_detections
+            ('detections', '/tag_detections')
         ]
     )
 
@@ -92,8 +100,8 @@ def generate_launch_description():
         name='apriltag_persistence_node',
         output='screen',
         remappings=[
-            ('/tag_detections', '/tag_detections'), # Subscribe to apriltag_node's output
-            ('/persistent_tag_detections', '/detections') # Publish to original /detections for Nav2
+            ('/tag_detections', '/tag_detections'),
+            ('/persistent_tag_detections', '/detections')
         ]
     )
 
@@ -112,7 +120,7 @@ def generate_launch_description():
         executable='debug_visualizer',
         name='debug_visualizer',
         output='screen',
-        arguments=['--ros-args', '--remap', 'detections:=/persistent_tag_detections'] # Remap debug_visualizer to persistent detections
+        arguments=['--ros-args', '--remap', 'detections:=/persistent_tag_detections']
     )
 
     # RViz node
@@ -141,8 +149,9 @@ def generate_launch_description():
         ),
         robot_state_publisher_node,
         usb_cam_node,
+        image_preprocessor_node, # ADDED
         apriltag_node,
-        apriltag_persistence_node, # <--- ADDED HERE
+        apriltag_persistence_node,
         calibrated_camera_processor_node,
         debug_visualizer_node,
         rviz_node,

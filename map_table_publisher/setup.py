@@ -35,6 +35,7 @@ setup(
             'raw_ceiling_camera_processor = map_table_publisher.raw_ceiling_camera_processor:main',
             'apriltag_persistence_node = map_table_publisher.apriltag_persistence_node:main',
             'apriltag_tracker_node = map_table_publisher.apriltag_tracker_node:main',
+            'image_preprocessor_node = map_table_publisher.image_preprocessor_node:main',
         ],
     },
 )
