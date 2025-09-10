@@ -31,7 +31,7 @@ class QosRelayNode(Node):
         self.image_pub = self.create_publisher(
             Image,
             '/image_relay/image_raw',
-            qos_profile=qos_best_effort
+            qos_profile=qos_reliable
         )
         self.get_logger().info('Relay for Image topic created.')
 
@@ -46,13 +46,13 @@ class QosRelayNode(Node):
         self.camerainfo_pub = self.create_publisher(
             CameraInfo,
             '/image_relay/camera_info',
-            qos_profile=qos_best_effort
+            qos_profile=qos_reliable
         )
         self.get_logger().info('Relay for CameraInfo topic created.')
 
         self.get_logger().info('QoS Relay Node has been started.')
-        self.get_logger().info('Relaying /ceiling_camera/image_raw (RELIABLE) -> /image_relay/image_raw (BEST_EFFORT)')
-        self.get_logger().info('Relaying /ceiling_camera/camera_info (RELIABLE) -> /image_relay/camera_info (BEST_EFFORT)')
+        self.get_logger().info('Relaying /ceiling_camera/image_raw (RELIABLE) -> /image_relay/image_raw (RELIABLE)')
+        self.get_logger().info('Relaying /ceiling_camera/camera_info (RELIABLE) -> /image_relay/camera_info (RELIABLE)')
 
 
     def image_callback(self, msg):
