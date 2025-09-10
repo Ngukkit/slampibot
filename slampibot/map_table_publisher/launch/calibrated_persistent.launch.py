@@ -29,7 +29,7 @@ def generate_launch_description():
                     'image_width': 1280,
                     'image_height': 720,
                     'framerate': 10.0,
-                    'pixel_format': 'yuyv',
+                    'pixel_format': 'yuyv2rgb',
                     'camera_name': 'ceiling_camera',
                     'camera_info_url': 'package://map_table_publisher/config/camera_info.yaml',
                     'io_method': 'mmap',
@@ -109,5 +109,12 @@ def generate_launch_description():
             name='debug_visualizer',
             output='screen',
             arguments=['--ros-args', '--remap', 'detections:=/persistent_tag_detections']
+        ),
+        
+        Node(
+            package='map_table_publisher',
+            executable='camera_monitor_node',
+            name='camera_monitor',
+            output='screen'
         ),
     ])

@@ -6,6 +6,7 @@ import numpy as np
 import math
 import cv2
 from scipy.optimize import least_squares
+import tf_transformations
 
 from apriltag_msgs.msg import AprilTagDetectionArray
 from geometry_msgs.msg import PoseStamped, PolygonStamped, Point32, TransformStamped, Quaternion, Pose
@@ -50,10 +51,10 @@ class CalibratedCameraProcessor(Node):
         # Get landmark tags parameters
         self.landmark_tags = {}
         self.landmark_tag_sizes = {}  # Dictionary to store tag sizes
-        # Manually parse landmark_tags parameters
-        all_params = self._parameters
+        # Manually parse landmark_tags parameters using proper ROS2 parameter API
+        param_names = self.list_parameters([], 10).names  # Recursively list all parameters up to 10 levels deep
         temp_landmarks = {}
-        for param_name, param_value in all_params.items():
+        for param_name in param_names:
             if param_name.startswith('landmark_tags.'):
                 parts = param_name.split('.')
                 if len(parts) == 3:
@@ -62,7 +63,9 @@ class CalibratedCameraProcessor(Node):
                         tag_id = int(tag_id_str)
                         if tag_id not in temp_landmarks:
                             temp_landmarks[tag_id] = {}
-                        temp_landmarks[tag_id][coord] = float(param_value.value)
+                        # Get parameter value using proper API
+                        param_value = self.get_parameter(param_name).value
+                        temp_landmarks[tag_id][coord] = float(param_value)
                     except ValueError:
                         self.get_logger().warn(f"Invalid tag ID format: {tag_id_str}")
 
@@ -254,8 +257,12 @@ class CalibratedCameraProcessor(Node):
                                 self.orientation = type('Orientation', (), {'x': qx, 'y': qy, 'z': qz, 'w': qw})()
                         
                         # For tags on the ground, we want Z=0 in world coordinates
-                        current_pose = MockPose(corrected_x, corrected_y, corrected_z, 
-                                               0.0, 0.0, 0.0, 1.0)  # Simple identity quaternion for now
+                        # Use the actual rotation from solvePnP for more accurate orientation
+                        qx, qy, qz, qw = tf_transformations.quaternion_from_matrix(
+                            np.vstack((np.hstack((rotation_matrix, np.array([[0], [0], [0]]))), 
+                                      np.array([[0, 0, 0, 1]]))))
+                        
+                        current_pose = MockPose(corrected_x, corrected_y, corrected_z, qx, qy, qz, qw)
                         
                         self.get_logger().info(f"Computed accurate 3D pose for tag {tag_id}: "
                                              f"({corrected_x:.3f}, {corrected_y:.3f}, {corrected_z:.3f})")
@@ -378,7 +385,7 @@ class CalibratedCameraProcessor(Node):
             if detected_robot_pose:
                 self.publish_robot_transform(detected_robot_pose, header)
             
-            # Process table tags in pairs (only when both tags of a pair are available in processed_table_tags_for_obstacle)
+            # Process table tags in pairs (both tags when available, or estimate position when only one tag is available)
             for pair in self.table_pairs:
                 tag1_id, tag2_id = pair
                 self.get_logger().info(f"Checking table pair {pair}: tag1_id={tag1_id} in processed={tag1_id in processed_table_tags_for_obstacle}, tag2_id={tag2_id} in processed={tag2_id in processed_table_tags_for_obstacle}")
@@ -708,7 +715,9 @@ class CalibratedCameraProcessor(Node):
                         self.get_logger().warn(f'Homography transformation resulted in NaN/Inf for table tag {tag_id}. Skipping.')
                         continue
 
-                    poses_in_map[tag_id] = (float(dst_point[0][0][0]), float(dst_point[0][0][1]))
+                    # Account for camera orientation (ceiling-mounted, looking down)
+                    # The camera coordinate system has Y pointing down, but we want Y pointing up
+                    poses_in_map[tag_id] = (float(dst_point[0][0][0]), -float(dst_point[0][0][1]))
                 except Exception as e:
                     self.get_logger().warn(f'Could not transform table tag {tag_id} pose using homography: {e}')
                     continue
@@ -738,11 +747,51 @@ class CalibratedCameraProcessor(Node):
             self.get_logger().warn('No transformation available for table tags.')
             return
 
-        if len(poses_in_map) < 2:
-            return
+        # Handle case where only one tag is detected
+        if len(poses_in_map) == 1:
+            # For a square table, estimate the position of the missing tag
+            # Assuming tags are on opposite corners of a square table
+            tag_id = list(poses_in_map.keys())[0]
+            x1, y1 = poses_in_map[tag_id]
+            
+            # Find the corresponding pair for this tag
+            pair = None
+            for p in self.table_pairs:
+                if tag_id in p:
+                    pair = p
+                    break
+            
+            if pair is not None:
+                # Determine the other tag ID in the pair
+                other_tag_id = pair[0] if pair[1] == tag_id else pair[1]
+                
+                # Estimate position of the missing tag
+                # For now, we'll use a fixed table size assumption (1m x 1m)
+                table_size = 1.0
+                
+                # Simple estimation: place the missing tag at a fixed distance
+                # This is a placeholder - in a real implementation, you might use:
+                # - Known table dimensions
+                # - Previous positions of the table
+                # - Expected orientation based on environment
+                x2 = x1 + table_size
+                y2 = y1 + table_size
+                
+                # Add the estimated position to poses_in_map
+                poses_in_map[other_tag_id] = (x2, y2)
+                self.get_logger().info(f"Estimated position for missing tag {other_tag_id}: ({x2:.3f}, {y2:.3f})")
+            else:
+                self.get_logger().warn(f"Could not find pair for tag {tag_id}")
+                return
 
         tag_ids = list(poses_in_map.keys())
         (x1, y1) = poses_in_map[tag_ids[0]]
+        
+        # If we still don't have two points, we can't define a table
+        if len(poses_in_map) < 2:
+            self.get_logger().warn("Not enough points to define a table obstacle")
+            return
+            
         (x2, y2) = poses_in_map[tag_ids[1]]
 
         # Calculate yaw from the vector connecting the two tags, assuming they are on a diagonal

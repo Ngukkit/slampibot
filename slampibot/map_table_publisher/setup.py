@@ -41,6 +41,7 @@ setup(
             'map_aligner = map_table_publisher.map_aligner:main',
             'landmark_visualizer = map_table_publisher.landmark_visualizer:main',
             'polygon_to_pointcloud_node = map_table_publisher.polygon_to_pointcloud_node:main',
+            'camera_monitor_node = map_table_publisher.camera_monitor_node:main',
         ],
     },
 )

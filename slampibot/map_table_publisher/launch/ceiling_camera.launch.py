@@ -37,7 +37,7 @@ def generate_launch_description():
             'image_width': 640,
             'image_height': 480,
             'framerate': 30.0,
-            'pixel_format': 'yuyv',
+            'pixel_format': 'rgb24',
             'camera_name': 'ceiling_camera',
             'camera_info_url': 'package://map_table_publisher/config/camera_info.yaml',
             'io_method': 'mmap',
@@ -72,8 +72,8 @@ def generate_launch_description():
             {'use_camera_info': True}
         ],
         remappings=[
-            ('image_rect', '/ceiling_camera/image_rect'),
-            ('camera_info', '/ceiling_camera/camera_info_rect'),
+            ('image_rect', '/ceiling_camera/image_raw'),
+            ('camera_info', '/ceiling_camera/camera_info'),
             ('detections', '/detections')
         ]
     )
