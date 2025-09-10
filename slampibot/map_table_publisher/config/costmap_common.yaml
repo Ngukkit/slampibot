@@ -1,0 +1,34 @@
+global_frame: map
+robot_base_frame: base_link
+update_frequency: 5.0
+publish_frequency: 2.0
+transform_tolerance: 0.5
+footprint: [[-0.15, -0.15], [-0.15, 0.15], [0.15, 0.15], [0.15, -0.15]]
+
+plugins:
+  - {name: static_layer, type: "costmap_2d::StaticLayer"}
+  - {name: table_layer, type: "polygon_layer::PolygonLayer"}
+  - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
+  - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+
+table_layer:
+  enabled: true
+  polygon_topic: "/table_obstacle"
+  footprint_clearing_enabled: true
+
+obstacle_layer:
+  enabled: true
+  max_obstacle_height: 2.0
+  obstacle_range: 2.5
+  raytrace_range: 3.0
+  inflation_radius: 0.2
+  track_unknown_space: false
+  combination_method: 1
+
+  observation_sources: laser_scan_sensor
+  laser_scan_sensor: {sensor_frame: laser_link, data_type: LaserScan, topic: /scan, marking: true, clearing: true}
+
+inflation_layer:
+  enabled: true
+  cost_scaling_factor: 5.0
+  inflation_radius: 0.3

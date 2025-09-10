@@ -1,0 +1,5 @@
+table_obstacle_layer:
+  ros__parameters:
+    enabled: true
+    polygon_topic: "/table_obstacle"
+    footprint_clearing_enabled: true

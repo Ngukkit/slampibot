@@ -1,0 +1,14 @@
+digraph G {
+"chassis" -> "camera"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"dummy_link" -> "chassis"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"chassis" -> "lidar"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"default_cam" -> "tag36h11:100"[label=" Broadcaster: default_authority\nAverage rate: 4.622\nBuffer length: 2.164\nMost recent transform: 1755740155.444236\nOldest transform: 1755740153.280476\n"];
+"default_cam" -> "tag36h11:0"[label=" Broadcaster: default_authority\nAverage rate: 2.423\nBuffer length: 2.064\nMost recent transform: 1755740155.444236\nOldest transform: 1755740153.380481\n"];
+"default_cam" -> "tag36h11:300"[label=" Broadcaster: default_authority\nAverage rate: 3.876\nBuffer length: 2.064\nMost recent transform: 1755740155.444236\nOldest transform: 1755740153.380481\n"];
+"default_cam" -> "tag36h11:1"[label=" Broadcaster: default_authority\nAverage rate: 2.252\nBuffer length: 1.332\nMost recent transform: 1755740155.444236\nOldest transform: 1755740154.112321\n"];
+"default_cam" -> "tag36h11:2"[label=" Broadcaster: default_authority\nAverage rate: 1.502\nBuffer length: 1.332\nMost recent transform: 1755740155.444236\nOldest transform: 1755740154.112321\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1755740155.8226569"[ shape=plaintext ] ;
+}->"default_cam";
+}

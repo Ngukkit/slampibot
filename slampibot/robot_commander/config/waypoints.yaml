@@ -1,0 +1,73 @@
+waypoints:
+  - id: 1
+    name: "Kitchen"
+    pose:
+      position:
+        x: 0.23872964084148407
+        y: 0.09685254096984863
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 2
+    name: "Base Station"
+    pose:
+      position:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 3
+    name: "Table 1"
+    pose:
+      position:
+        x: 1.0
+        y: 0.5
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 4
+    name: "Table 2"
+    pose:
+      position:
+        x: 2.0
+        y: -0.5
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 5
+    name: "Table 3"
+    pose:
+      position:
+        x: 3.0
+        y: 0.5
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0
+  - id: 6
+    name: "Table 4"
+    pose:
+      position:
+        x: 4.0
+        y: -0.5
+        z: 0.0
+      orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0

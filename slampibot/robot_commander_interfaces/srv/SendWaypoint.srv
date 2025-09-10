@@ -1,0 +1,3 @@
+int64 waypoint_id
+---
+bool success

@@ -1,0 +1,62 @@
+apriltag_ceiling_camera:
+  ros__parameters:
+    tag_family: 'tag36h11'
+    tag_size: 0.05
+    publish_tf: true
+    qos_overrides:
+      image_rect:
+        reliability: reliable
+        history: keep_last
+        depth: 10
+
+calibrated_camera_processor:
+  ros__parameters:
+    camera_height: 1.79
+    robot_tag_id: 0
+    table_tag_pairs: [1, 2, 3, 4, 5, 6, 7, 8]
+    tag_family: 'tag36h11'
+    tag_size: 0.05
+    publish_tf: false
+    landmark_tags:
+      '100':
+        x: 1.8679050207138062
+        y: 3.0252602100372314
+        size: 0.05
+      '200':
+        x: 1.9471464157104492
+        y: 1.8451433181762695
+        size: 0.05
+      '300':
+        x: 0.36555802822113037
+        y: 3.016554594039917
+        size: 0.05
+      '400':
+        x: 0.3475612998008728
+        y: 1.8438692092895508
+        size: 0.05
+
+landmark_visualizer:
+  ros__parameters:
+    camera_height: 1.79
+    robot_tag_id: 0
+    table_tag_pairs: [1, 2, 3, 4, 5, 6, 7, 8]
+    tag_family: 'tag36h11'
+    tag_size: 0.05
+    publish_tf: false
+    landmark_tags:
+      '100':
+        x: 1.8679050207138062
+        y: 3.0252602100372314
+        size: 0.05
+      '200':
+        x: 1.9471464157104492
+        y: 1.8451433181762695
+        size: 0.05
+      '300':
+        x: 0.36555802822113037
+        y: 3.016554594039917
+        size: 0.05
+      '400':
+        x: 0.3475612998008728
+        y: 1.8438692092895508
+        size: 0.05
