@@ -19,7 +19,7 @@ class CameraMonitor(Node):
             10)
         
         # Timer for checking camera status
-        self.timer = self.create_timer(5.0, self.check_camera_status)
+        self.timer = self.create_timer(2.0, self.check_camera_status)
         
         # Status variables
         self.last_detection_time = time.time()
@@ -34,11 +34,11 @@ class CameraMonitor(Node):
             self.get_logger().info(f'Received {len(msg.detections)} detections')
             
     def check_camera_status(self):
-        # Check if no detections received for more than 5 seconds
+        # Check if no detections received for more than 2 seconds
         current_time = time.time()
         time_since_last_detection = current_time - self.last_detection_time
         
-        if time_since_last_detection > 5.0 and not self.camera_restarting:
+        if time_since_last_detection > 2.0 and not self.camera_restarting:
             self.get_logger().warn(f'No detections for {time_since_last_detection:.1f} seconds. Restarting camera...')
             self.restart_camera()
             
@@ -55,8 +55,8 @@ class CameraMonitor(Node):
             subprocess.run(['pkill', '-f', 'usb_cam_node_exe'], check=True)
             self.get_logger().info('Killed existing camera process')
             
-            # Wait a moment
-            time.sleep(2)
+            # Wait a moment - reduced from 2 seconds to 0.5 seconds
+            time.sleep(0.5)
             
             # Restart camera with the same parameters as in calibrated_persistent.launch.py
             cmd = [
@@ -84,8 +84,8 @@ class CameraMonitor(Node):
         except Exception as e:
             self.get_logger().error(f'Unexpected error restarting camera: {e}')
         finally:
-            # Reset the flag after some time to allow future restarts
-            time.sleep(30)
+            # Reset the flag after some time to allow future restarts - reduced from 30 seconds to 5 seconds
+            time.sleep(5)
             self.camera_restarting = False
 
 def main(args=None):

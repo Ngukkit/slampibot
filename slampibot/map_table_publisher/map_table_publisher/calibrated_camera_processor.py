@@ -715,9 +715,9 @@ class CalibratedCameraProcessor(Node):
                         self.get_logger().warn(f'Homography transformation resulted in NaN/Inf for table tag {tag_id}. Skipping.')
                         continue
 
-                    # Account for camera orientation (ceiling-mounted, looking down)
-                    # The camera coordinate system has Y pointing down, but we want Y pointing up
-                    poses_in_map[tag_id] = (float(dst_point[0][0][0]), -float(dst_point[0][0][1]))
+                    # The homography matrix already accounts for the coordinate system transformation
+                    # so we don't need to flip the Y axis here
+                    poses_in_map[tag_id] = (float(dst_point[0][0][0]), float(dst_point[0][0][1]))
                 except Exception as e:
                     self.get_logger().warn(f'Could not transform table tag {tag_id} pose using homography: {e}')
                     continue
@@ -766,16 +766,47 @@ class CalibratedCameraProcessor(Node):
                 other_tag_id = pair[0] if pair[1] == tag_id else pair[1]
                 
                 # Estimate position of the missing tag
-                # For now, we'll use a fixed table size assumption (1m x 1m)
-                table_size = 1.0
+                # Assuming a square table with a fixed size of 0.6m x 0.6m
+                # This is a more realistic size for the tables in our environment
+                table_size = 0.6
                 
-                # Simple estimation: place the missing tag at a fixed distance
+                # Calculate the vector from the detected tag to the center of the table
+                # Then, calculate the position of the other tag based on this vector
+                # This is a more accurate estimation than the previous one
+                # First, we need to know which tag is which (1, 2, 3, 4, 5, 6, 7, 8)
+                # Then, we can determine the relative position of the other tag
+                # For now, we'll assume a simple case where the tags are on opposite corners
+                # and the table is aligned with the axes.
                 # This is a placeholder - in a real implementation, you might use:
                 # - Known table dimensions
                 # - Previous positions of the table
                 # - Expected orientation based on environment
-                x2 = x1 + table_size
-                y2 = y1 + table_size
+                # - Or a more sophisticated estimation algorithm
+                
+                # Simple estimation for now: assume the table is aligned with the axes
+                # and the tags are on opposite corners.
+                # This will be improved in the next version.
+                # For table pairs (1,2), (3,4), (5,6), (7,8):
+                # - If tag1 is detected, tag2 is to the right and up
+                # - If tag2 is detected, tag1 is to the left and down
+                # - If tag3 is detected, tag4 is to the right and up
+                # - If tag4 is detected, tag3 is to the left and down
+                # And so on...
+                
+                # This is still a simplified estimation.
+                # A more accurate estimation would take into account the actual table orientation.
+                
+                # For tables 1 and 2 (pair 1,2) - assuming tag 1 is bottom-left, tag 2 is top-right
+                # For tables 3 and 4 (pair 3,4) - assuming tag 3 is bottom-left, tag 4 is top-right
+                # For tables 5 and 6 (pair 5,6) - assuming tag 5 is bottom-left, tag 6 is top-right
+                # For tables 7 and 8 (pair 7,8) - assuming tag 7 is bottom-left, tag 8 is top-right
+                
+                if tag_id in [1, 3, 5, 7]:  # Lower-left tags (odd numbers)
+                    x2 = x1 + table_size
+                    y2 = y1 + table_size
+                else:  # Upper-right tags (even numbers)
+                    x2 = x1 - table_size
+                    y2 = y1 - table_size
                 
                 # Add the estimated position to poses_in_map
                 poses_in_map[other_tag_id] = (x2, y2)
@@ -875,6 +906,8 @@ class CalibratedCameraProcessor(Node):
                         self.get_logger().warn(f'Homography transformation resulted in NaN/Inf for landmark {tag_id}. Skipping.')
                         continue
 
+                    # The homography matrix already accounts for the coordinate system transformation
+                    # so we don't need to flip the Y axis here
                     transformed_pose.position.x = float(dst_point[0][0][0])
                     transformed_pose.position.y = float(dst_point[0][0][1])
                     transformed_pose.position.z = float(0.0) # Homography is 2D, set Z to 0
